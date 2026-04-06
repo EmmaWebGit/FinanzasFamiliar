@@ -1,0 +1,2888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FamilyFinance</title>
+<meta name="theme-color" content="#e07b39"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="FamilyFinance"/>
+<!-- Tailwind dark mode config BEFORE cdn load -->
+<script>window.tailwind={config:{darkMode:'class'}}</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Firebase compat (v9 modular loaded dynamically in JS) -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+*{-webkit-tap-highlight-color:transparent !important;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;overscroll-behavior:none;background:#fdf6f0}
+.dark body{background:#111318}
+.page{min-height:calc(100dvh - 4.5rem);padding-bottom:5.5rem}
+.card{background:#fff;border-radius:20px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:1rem}
+.dark .card{background:#1e2130}
+/* ── BUTTONS: explicit transforms so GitHub Pages WebView respects them ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  font-weight:700;border-radius:14px;cursor:pointer;border:none;
+  font-family:inherit;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;
+  position:relative;overflow:hidden;
+  /* Explicit transition — no shorthand so it can't be overridden */
+  transition-property:transform,opacity,background-color !important;
+  transition-duration:120ms !important;
+  transition-timing-function:ease !important;
+  /* Hardware acceleration hint */
+  -webkit-transform:translateZ(0);transform:translateZ(0);
+  will-change:transform,opacity;
+}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{
+  -webkit-transform:scale(.91) translateZ(0) !important;
+  transform:scale(.91) translateZ(0) !important;
+  opacity:.78 !important;
+  filter:brightness(.92) !important;
+  transition-duration:60ms !important;
+}
+.btn-primary{background:#e07b39;color:#fff;padding:.7rem 1.1rem}
+.btn-primary:hover{background:#c4622a;filter:none}
+.btn-primary:active{background:#b35520 !important}
+.btn-ghost{background:#f3e9e0;color:#7c4a20;padding:.6rem .9rem}
+.dark .btn-ghost{background:#2a2038;color:#f5c99a}
+.btn-ghost:active{background:#dcc4ae !important}
+.dark .btn-ghost:active{background:#3a2d4d !important}
+.btn-sm{padding:.45rem .85rem;font-size:.8rem}
+/* JS-added class for programmatic tap feedback */
+.btn-tapped{
+  -webkit-transform:scale(.89) translateZ(0) !important;
+  transform:scale(.89) translateZ(0) !important;
+  opacity:.72 !important;
+  transition:none !important;
+}
+/* Small inline buttons (edit/delete in lists) */
+button:not(.btn):not(.nav-btn){touch-action:manipulation;-webkit-tap-highlight-color:transparent !important}
+button:not(.btn):not(.nav-btn):active{opacity:.6;transform:scale(.93)}
+.field{width:100%;border:2px solid #e8ddd5;border-radius:14px;padding:.7rem 1rem;background:#fff;color:#1a1a2e;font-family:inherit;font-size:.875rem;outline:none;transition:border .15s}
+.field:focus{border-color:#e07b39}
+.dark .field{background:#252836;border-color:#353a50;color:#e8e4dc}
+.dark .field:focus{border-color:#e07b39}
+.nav-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:.45rem .5rem;color:#9ca3af;cursor:pointer;border:none;
+  background:transparent;font-family:inherit;border-radius:12px;
+  touch-action:manipulation;
+  transition-property:color,transform !important;
+  transition-duration:120ms !important;
+}
+.nav-btn:active{-webkit-transform:scale(.85) !important;transform:scale(.85) !important}
+.nav-btn.active{color:#e07b39}
+.nav-dot{width:4px;height:4px;border-radius:50%;background:#e07b39;display:none}
+.nav-btn.active .nav-dot{display:block}
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.modal-box{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:92dvh;overflow-y:auto;padding:1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));animation:slideUp .25s cubic-bezier(.4,0,.2,1)}
+.dark .modal-box{background:#1c1f2e}
+.progress-wrap{height:8px;border-radius:6px;background:#f0e8e0;overflow:hidden}
+.dark .progress-wrap{background:#2d2d3d}
+.progress-bar{height:100%;border-radius:6px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.spinner{width:28px;height:28px;border:3px solid rgba(224,123,57,.25);border-top-color:#e07b39;border-radius:50%;animation:spin .75s linear infinite}
+.toast-el{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;padding:.5rem 1.1rem;border-radius:30px;font-size:.75rem;font-weight:700;z-index:200;white-space:nowrap;pointer-events:none;transition:opacity .3s}
+.dark .toast-el{background:#f5c99a;color:#2a1500}
+.chart-wrap{position:relative;height:195px}
+.mono{font-family:'DM Mono',monospace}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700}
+.fb-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .28s ease both}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:#e07b39;border-radius:2px}
+input[type=date],input[type=month]{color-scheme:light}
+.dark input[type=date],.dark input[type=month]{color-scheme:dark}
+</style>
+</head>
+<body class="text-gray-900 dark:text-gray-100 select-none">
+<div id="APP" class="max-w-md mx-auto relative">
+
+<!-- ===== SPLASH ===== -->
+<div id="SCR_LOADING" class="fixed inset-0 flex flex-col items-center justify-center z-50" style="background:linear-gradient(145deg,#e07b39,#c4622a)">
+  <div class="text-6xl mb-3">💰</div>
+  <h1 class="text-white text-2xl font-extrabold">FamilyFinance</h1>
+  <p class="text-orange-100 text-sm mt-1 mb-8">Gestión Familiar Inteligente</p>
+  <div class="spinner" style="border-color:rgba(255,255,255,.25);border-top-color:white"></div>
+</div>
+
+<!-- ===== AUTH ===== -->
+<div id="SCR_AUTH" class="hidden min-h-dvh flex flex-col bg-orange-50 dark:bg-gray-900">
+  <div class="flex-1 flex flex-col items-center justify-center px-6 pb-4">
+    <div class="text-center mb-5">
+      <div class="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-3" style="background:linear-gradient(145deg,#e07b39,#c4622a);box-shadow:0 8px 24px rgba(224,123,57,.4)">💰</div>
+      <h1 class="text-2xl font-extrabold text-orange-600">FamilyFinance</h1>
+      <p class="text-gray-500 text-xs mt-1">Gestión Familiar Inteligente</p>
+    </div>
+    <!-- Firebase status -->
+    <div id="AUTH_fb_status" class="hidden mb-3 flex items-center gap-2 text-xs px-3 py-2 rounded-xl bg-white dark:bg-gray-800 shadow-sm">
+      <span class="fb-dot bg-green-400"></span><span class="text-green-600 dark:text-green-400 font-semibold">Firebase conectado</span>
+    </div>
+    <!-- Tab selector -->
+    <div class="flex bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 mb-4 w-full max-w-xs">
+      <button onclick="authTab('login')" id="TAB_login" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all bg-white dark:bg-gray-700 text-orange-600 shadow-sm">Entrar</button>
+      <button onclick="authTab('register')" id="TAB_register" class="flex-1 py-2 rounded-xl text-sm font-bold transition-all text-gray-400">Registrarse</button>
+    </div>
+    <!-- Login form -->
+    <div id="FORM_login" class="w-full max-w-xs space-y-3">
+      <input id="l_email" type="email" class="field" placeholder="Email" autocomplete="email"/>
+      <input id="l_pass" type="password" class="field" placeholder="Contraseña" autocomplete="current-password"/>
+      <button onclick="doLogin()" class="btn btn-primary w-full">Entrar</button>
+      <div class="flex items-center gap-2"><div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div><span class="text-xs text-gray-400">o</span><div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div></div>
+      <button onclick="doGoogle()" class="btn btn-ghost w-full text-sm" id="BTN_google">
+        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continuar con Google
+      </button>
+      <p id="l_err" class="text-red-500 text-xs text-center hidden"></p>
+    </div>
+    <!-- Register form -->
+    <div id="FORM_register" class="hidden w-full max-w-xs space-y-3">
+      <input id="r_name" type="text" class="field" placeholder="Nombre completo"/>
+      <input id="r_email" type="email" class="field" placeholder="Email"/>
+      <input id="r_pass" type="password" class="field" placeholder="Contraseña (mín. 6 caracteres)"/>
+      <input id="r_salary" type="number" class="field" placeholder="Salario mensual (ARS)"/>
+      <div class="flex gap-2">
+        <button onclick="showJoinForm()" class="btn btn-ghost flex-1 text-xs">Unirme a familia</button>
+        <button onclick="doRegisterNew()" class="btn btn-primary flex-1 text-xs">Nueva familia</button>
+      </div>
+      <div id="JOIN_form" class="hidden space-y-2">
+        <input id="r_code" type="text" class="field" placeholder="Código familia (ej: FAM-XXXXXX)"/>
+        <button onclick="doJoinFamily()" class="btn btn-primary w-full text-sm">Unirme a familia existente</button>
+      </div>
+      <p id="r_err" class="text-red-500 text-xs text-center hidden"></p>
+    </div>
+  </div>
+  <div class="flex justify-center gap-5 pb-5">
+    <button onclick="toggleLang()" class="text-gray-400 text-xs flex items-center gap-1">🌐 <span id="LANG_AUTH">EN</span></button>
+    <button onclick="toggleDark()" class="text-gray-400 text-xs flex items-center gap-1">🌙 <span id="DARK_AUTH">Oscuro</span></button>
+    <button onclick="nav('settings');showScreen('app')" class="text-gray-400 text-xs flex items-center gap-1">⚙️ Firebase</button>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="SCR_APP" class="hidden">
+
+  <!-- Top Bar -->
+  <div class="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800" style="padding-top:env(safe-area-inset-top)">
+    <div class="flex items-center justify-between px-4 py-2.5">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="nav('settings')">
+        <div id="TB_avatar" class="w-9 h-9 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm" style="background:linear-gradient(135deg,#e07b39,#c4622a)">U</div>
+        <div>
+          <p id="TB_name" class="font-bold text-sm leading-tight">Usuario</p>
+          <p id="TB_family" class="text-xs text-gray-400 leading-tight flex items-center gap-1"><span id="TB_fb_dot" class="hidden fb-dot bg-gray-300"></span><span>Familia</span></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-0.5">
+        <button onclick="showAlerts()" class="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800">
+          <span class="text-lg">🔔</span>
+          <span id="ALERT_BADGE" class="hidden absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 items-center justify-center font-bold flex">0</span>
+        </button>
+        <button onclick="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"><span id="DARK_ICON">🌙</span></button>
+        <button onclick="toggleLang()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-extrabold text-gray-500"><span id="LANG_BTN">EN</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pages container -->
+  <div id="PAGES">
+
+    <!-- === DASHBOARD === -->
+    <div id="PG_dashboard" class="page px-4 pt-4 space-y-4 fade-in">
+      <div class="flex items-center justify-between">
+        <button onclick="prevMonth()" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold">◀</button>
+        <h2 id="MONTH_LABEL" class="font-extrabold text-lg"></h2>
+        <button onclick="nextMonth()" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold">▶</button>
+      </div>
+      <!-- Summary cards -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-2xl p-4 text-white col-span-2" style="background:linear-gradient(135deg,#e07b39,#c4622a)">
+          <div class="flex justify-between items-center">
+            <div><p class="text-orange-100 text-xs font-semibold">Balance disponible</p><p id="D_balance" class="text-3xl font-extrabold mt-0.5">$0</p></div>
+            <div class="text-right"><p class="text-orange-100 text-xs font-semibold">Ahorro este mes</p><p id="D_saverate" class="text-2xl font-extrabold mt-0.5">0%</p></div>
+          </div>
+        </div>
+        <div class="rounded-2xl p-3 text-white" style="background:linear-gradient(135deg,#10b981,#065f46)">
+          <p class="text-green-100 text-xs font-semibold">Ingresos</p><p id="D_income" class="text-xl font-extrabold mt-0.5">$0</p>
+        </div>
+        <div class="rounded-2xl p-3 text-white" style="background:linear-gradient(135deg,#ef4444,#b91c1c)">
+          <p class="text-red-100 text-xs font-semibold">Gastos</p><p id="D_expense" class="text-xl font-extrabold mt-0.5">$0</p>
+        </div>
+        <div class="rounded-2xl p-3 text-white" style="background:linear-gradient(135deg,#8b5cf6,#4c1d95)">
+          <p class="text-purple-100 text-xs font-semibold">Deuda tarjetas</p><p id="D_debt" class="text-xl font-extrabold mt-0.5">$0</p>
+        </div>
+        <div class="rounded-2xl p-3 text-white" style="background:linear-gradient(135deg,#f59e0b,#b45309)">
+          <p class="text-yellow-100 text-xs font-semibold">Cuotas/mes</p><p id="D_installments" class="text-xl font-extrabold mt-0.5">$0</p>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div class="card">
+        <div class="flex justify-between items-center mb-2">
+          <p class="font-bold text-sm">Gastos vs Ingresos</p>
+          <p id="D_ratio" class="mono text-sm font-bold text-orange-500">0%</p>
+        </div>
+        <div class="progress-wrap"><div id="D_progress" class="progress-bar bg-orange-400" style="width:0%"></div></div>
+        <p id="D_progress_hint" class="text-xs text-gray-400 mt-1"></p>
+      </div>
+      <!-- Alerts banner -->
+      <div id="D_alerts_box" class="hidden rounded-2xl p-3 border-2 border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20">
+        <div class="flex items-center justify-between mb-1">
+          <p class="text-amber-700 dark:text-amber-400 font-bold text-xs">⚠️ <span id="D_alert_count">0</span> alerta(s)</p>
+          <button onclick="showAlerts()" class="text-amber-600 text-xs font-bold">Ver →</button>
+        </div>
+        <div id="D_alert_list" class="text-xs text-amber-700 dark:text-amber-400 space-y-0.5"></div>
+      </div>
+      <!-- Category breakdown -->
+      <div class="card">
+        <p class="font-bold text-sm mb-3">Por categoría</p>
+        <div id="D_cats" class="space-y-2.5"></div>
+      </div>
+      <!-- Projection chart -->
+      <div class="card">
+        <div class="flex justify-between items-center mb-3">
+          <p class="font-bold text-sm">📈 Proyección saldo real (12 meses)</p>
+          <span class="text-xs text-gray-400">+ interés + cuotas</span>
+        </div>
+        <div class="chart-wrap"><canvas id="C_balance"></canvas></div>
+      </div>
+      <!-- Recent expenses -->
+      <div class="card">
+        <div class="flex justify-between items-center mb-3">
+          <p class="font-bold text-sm">Recientes</p>
+          <button onclick="nav('expenses')" class="text-orange-500 text-xs font-bold">Ver todos →</button>
+        </div>
+        <div id="D_recent" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- === GASTOS === -->
+    <div id="PG_expenses" class="hidden page px-4 pt-4 space-y-3 fade-in">
+      <div class="flex items-center justify-between">
+        <h2 class="font-extrabold text-lg">Gastos</h2>
+        <button onclick="openExpModal()" class="btn btn-primary btn-sm">+ Agregar</button>
+      </div>
+      <div class="flex gap-2 overflow-x-auto pb-1">
+        <button onclick="expFilter('all')" id="EF_all" class="flex-shrink-0 btn btn-primary btn-sm">Todos</button>
+        <button onclick="expFilter('month')" id="EF_month" class="flex-shrink-0 btn btn-ghost btn-sm">Este mes</button>
+        <button onclick="openImport()" class="flex-shrink-0 btn btn-ghost btn-sm">📥 CSV</button>
+        <button onclick="openPDFAnalyzer()" class="flex-shrink-0 btn btn-ghost btn-sm">📄 PDF</button>
+      </div>
+      <input id="EXP_search" type="text" class="field" placeholder="🔍 Buscar gastos..." oninput="renderExpenses()"/>
+      <div id="EXP_list" class="space-y-2 pb-2"></div>
+    </div>
+
+    <!-- === TARJETAS === -->
+    <div id="PG_cards" class="hidden page px-4 pt-4 space-y-4 fade-in">
+      <div class="flex items-center justify-between">
+        <h2 class="font-extrabold text-lg">Tarjetas</h2>
+        <button onclick="openCardModal()" class="btn btn-primary btn-sm">+ Agregar</button>
+      </div>
+      <div id="CARDS_list" class="space-y-4"></div>
+      <div class="card">
+        <div class="flex justify-between items-center mb-3">
+          <p class="font-bold text-sm">📉 Proyección deuda (12 meses)</p>
+          <span class="text-xs text-gray-400">con interés</span>
+        </div>
+        <div class="chart-wrap"><canvas id="C_debt"></canvas></div>
+      </div>
+      <div class="card">
+        <p class="font-bold text-sm mb-3">📋 Cuotas activas</p>
+        <div id="INST_list" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- === PRESUPUESTO / METAS === -->
+    <div id="PG_budget" class="hidden page px-4 pt-4 space-y-4 fade-in">
+      <div class="flex items-center justify-between">
+        <h2 class="font-extrabold text-lg">Presupuesto</h2>
+        <button onclick="openBudgetModal()" class="btn btn-primary btn-sm">+ Categoría</button>
+      </div>
+      <div id="BUD_list" class="space-y-3"></div>
+      <div class="flex items-center justify-between mt-1">
+        <h2 class="font-extrabold text-lg">Metas de Ahorro</h2>
+        <button onclick="openGoalModal()" class="btn btn-primary btn-sm">+ Meta</button>
+      </div>
+      <div id="GOAL_list" class="space-y-3"></div>
+      <div class="card">
+        <p class="font-bold text-sm mb-3">💰 Ahorro acumulado proyectado</p>
+        <div class="chart-wrap"><canvas id="C_savings"></canvas></div>
+      </div>
+      <div class="card">
+        <p class="font-bold text-sm mb-3">📊 Sueldo vs Inflación estimada</p>
+        <div class="chart-wrap"><canvas id="C_inflation"></canvas></div>
+      </div>
+    </div>
+
+    <!-- === ASESOR IA === -->
+    <div id="PG_advisor" class="hidden page px-4 pt-4 space-y-4 fade-in">
+      <div class="flex items-center justify-between">
+        <h2 class="font-extrabold text-lg">🤖 Asesor IA</h2>
+        <button onclick="runAdvisor()" class="btn btn-primary btn-sm">Analizar</button>
+      </div>
+      <!-- Score card -->
+      <div class="rounded-3xl p-5 text-white" style="background:linear-gradient(135deg,#e07b39,#c4622a)">
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <p class="text-orange-100 text-sm font-semibold">Salud Financiera</p>
+            <div class="flex items-end gap-2 mt-1">
+              <p id="ADV_score" class="text-5xl font-extrabold">—</p>
+              <p class="text-orange-200 text-sm mb-1">/100</p>
+            </div>
+            <p id="ADV_label" class="text-orange-200 text-sm mt-1">Presiona Analizar</p>
+          </div>
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle cx="44" cy="44" r="36" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="7"/>
+            <circle id="ADV_ring" cx="44" cy="44" r="36" fill="none" stroke="white" stroke-width="7"
+              stroke-dasharray="226" stroke-dashoffset="226" stroke-linecap="round"
+              transform="rotate(-90 44 44)" style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
+          </svg>
+        </div>
+      </div>
+      <!-- Summary stats row -->
+      <div id="ADV_stats" class="grid grid-cols-3 gap-2 hidden">
+        <div class="card text-center p-3"><p class="text-xs text-gray-400 mb-0.5">Ahorro</p><p id="ADV_saverate" class="text-lg font-extrabold text-green-500">0%</p></div>
+        <div class="card text-center p-3"><p class="text-xs text-gray-400 mb-0.5">Deuda/Ing</p><p id="ADV_debtratio" class="text-lg font-extrabold text-purple-500">0%</p></div>
+        <div class="card text-center p-3"><p class="text-xs text-gray-400 mb-0.5">Cuotas/Ing</p><p id="ADV_instratio" class="text-lg font-extrabold text-yellow-500">0%</p></div>
+      </div>
+      <div id="ADV_results" class="space-y-3">
+        <div class="card"><p class="text-gray-400 text-sm text-center py-4">Presiona "Analizar" para obtener recomendaciones personalizadas basadas en tus datos reales.</p></div>
+      </div>
+    </div>
+
+    <!-- === AJUSTES === -->
+    <div id="PG_settings" class="hidden page px-4 pt-4 space-y-4 fade-in">
+      <h2 class="font-extrabold text-lg">Ajustes</h2>
+
+      <!-- Firebase config - PRIORITY SECTION -->
+      <div class="card space-y-3 border-2 border-orange-200 dark:border-orange-800">
+        <div class="flex items-center justify-between">
+          <p class="font-bold text-sm">🔥 Firebase Cloud</p>
+          <div id="FB_status_badge" class="badge bg-gray-100 dark:bg-gray-700 text-gray-500 text-xs">
+            <span class="fb-dot bg-gray-300"></span> Sin conectar
+          </div>
+        </div>
+        <!-- Shown when CONNECTED -->
+        <div id="FB_connected_view" class="hidden space-y-3">
+          <div class="flex items-center gap-3 p-3 rounded-xl bg-green-50 dark:bg-green-900/20">
+            <span class="text-2xl">✅</span>
+            <div>
+              <p class="font-bold text-sm text-green-700 dark:text-green-400">Firebase conectado correctamente</p>
+              <p id="FB_connected_pid" class="text-xs text-green-600 dark:text-green-500 mono mt-0.5"></p>
+            </div>
+          </div>
+          <button onclick="clearFBConfig()" class="btn btn-ghost w-full text-sm">🔌 Desconectar Firebase</button>
+        </div>
+        <!-- Shown when NOT connected -->
+        <div id="FB_disconnected_view" class="space-y-3">
+          <p class="text-xs text-gray-400">Configura tu proyecto Firebase para sincronizar datos en la nube y entre dispositivos. Sin Firebase, la app funciona offline con localStorage.</p>
+          <div class="rounded-xl p-3 text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 space-y-1">
+            <p class="font-bold">⚠️ Requisitos en Firebase Console:</p>
+            <p>1. Authentication → Sign-in method → <strong>Email/Password: Activar</strong></p>
+            <p>2. Firestore Database → Crear base de datos</p>
+            <p>3. Reglas Firestore: allow read, write: if request.auth != null;</p>
+          </div>
+          <input id="FB_key" type="text" class="field text-xs mono" placeholder="apiKey * (empieza con AIza...)"/>
+          <input id="FB_pid" type="text" class="field text-xs mono" placeholder="projectId *"/>
+          <input id="FB_auth" type="text" class="field text-xs mono" placeholder="authDomain * (proyecto.firebaseapp.com)"/>
+          <input id="FB_bucket" type="text" class="field text-xs mono" placeholder="storageBucket (opcional)"/>
+          <div class="flex gap-2">
+            <button onclick="saveFBConfig()" class="btn btn-primary flex-1 text-sm">Guardar y conectar</button>
+          </div>
+          <div id="FB_hint" class="text-xs text-gray-400 hidden"></div>
+        </div>
+      </div>
+
+      <!-- Reports -->
+      <div class="card space-y-3">
+        <p class="font-bold text-sm">📊 Reportes</p>
+        <input id="RPT_month" type="month" class="field"/>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="exportCSV()" class="btn flex-col py-4 rounded-2xl gap-1 text-white text-sm font-bold" style="background:#16a34a">📊<br>Exportar CSV</button>
+          <button onclick="exportPDF()" class="btn flex-col py-4 rounded-2xl gap-1 text-white text-sm font-bold" style="background:#dc2626">📄<br>Exportar PDF</button>
+        </div>
+        <div class="chart-wrap"><canvas id="C_pie"></canvas></div>
+        <div id="RPT_stats" class="space-y-1.5 text-sm"></div>
+      </div>
+
+      <!-- Profile -->
+      <div class="card space-y-3">
+        <p class="font-bold text-sm">👤 Mi perfil</p>
+        <input id="S_name" type="text" class="field" placeholder="Nombre completo"/>
+        <input id="S_salary" type="number" class="field" placeholder="Salario mensual neto (ARS)"/>
+        <input id="S_inflation" type="number" class="field" placeholder="Inflación mensual estimada %" step="0.1"/>
+        <button onclick="saveProfile()" class="btn btn-primary w-full text-sm">Guardar perfil</button>
+      </div>
+
+      <!-- Family -->
+      <div class="card space-y-3">
+        <p class="font-bold text-sm">👨‍👩‍👧 Mi familia</p>
+        <div id="FAM_info" class="text-sm text-gray-500"></div>
+        <button onclick="copyCode()" class="btn btn-ghost w-full text-sm">📋 Copiar código de invitación</button>
+        <p class="font-semibold text-xs text-gray-400 uppercase tracking-wide">Miembros</p>
+        <div id="FAM_members" class="space-y-2"></div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="rounded-2xl p-4 space-y-2 bg-red-50 dark:bg-red-900/20">
+        <p class="font-bold text-sm text-red-600">⚠️ Zona peligrosa</p>
+        <button onclick="clearData()" class="btn w-full text-sm border-2 border-red-300 text-red-600" style="background:transparent">Borrar datos locales</button>
+        <button onclick="doLogout()" class="btn w-full text-sm text-white" style="background:#dc2626">Cerrar sesión</button>
+      </div>
+    </div>
+
+  </div><!-- /PAGES -->
+
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 z-40" style="padding-bottom:env(safe-area-inset-bottom)">
+    <div class="flex items-center justify-around px-1 pt-1.5 pb-1">
+      <button onclick="nav('dashboard')" class="nav-btn active" id="NV_dashboard"><span class="text-xl">🏠</span><span class="text-[9px] font-semibold">Inicio</span><span class="nav-dot"></span></button>
+      <button onclick="nav('expenses')" class="nav-btn" id="NV_expenses"><span class="text-xl">💸</span><span class="text-[9px] font-semibold">Gastos</span><span class="nav-dot"></span></button>
+      <button onclick="nav('cards')" class="nav-btn" id="NV_cards"><span class="text-xl">💳</span><span class="text-[9px] font-semibold">Tarjetas</span><span class="nav-dot"></span></button>
+      <button onclick="nav('budget')" class="nav-btn" id="NV_budget"><span class="text-xl">🎯</span><span class="text-[9px] font-semibold">Metas</span><span class="nav-dot"></span></button>
+      <button onclick="nav('advisor')" class="nav-btn" id="NV_advisor"><span class="text-xl">🤖</span><span class="text-[9px] font-semibold">IA</span><span class="nav-dot"></span></button>
+      <button onclick="nav('settings')" class="nav-btn" id="NV_settings"><span class="text-xl">⚙️</span><span class="text-[9px] font-semibold">Más</span><span class="nav-dot"></span></button>
+    </div>
+  </nav>
+</div><!-- /SCR_APP -->
+
+</div><!-- /APP -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- EXPENSE MODAL -->
+<div id="M_expense" class="modal-wrap hidden" onclick="bgClose(event,'M_expense')">
+  <div class="modal-box space-y-3">
+    <div class="flex justify-between items-center"><h3 id="M_exp_title" class="font-extrabold text-lg">Agregar Gasto</h3><button onclick="closeModal('M_expense')" class="text-3xl text-gray-400 font-thin leading-none">×</button></div>
+    <input id="E_date" type="date" class="field"/>
+    <input id="E_amount" type="number" class="field" placeholder="Monto (ARS)" step="0.01"/>
+    <select id="E_cat" class="field"></select>
+    <input id="E_desc" type="text" class="field" placeholder="Descripción (comercio, detalle...)"/>
+    <select id="E_card" class="field"></select>
+    <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-xl p-3 cursor-pointer" onclick="toggleInstSection()">
+      <span class="text-sm font-semibold">📦 Pago en cuotas</span>
+      <span id="INST_arrow" class="text-gray-400 font-bold text-lg leading-none">+</span>
+    </div>
+    <div id="INST_section" class="hidden space-y-2">
+      <div class="flex gap-2">
+        <div class="flex-1"><label class="text-xs text-gray-500 block mb-1">Total cuotas</label><input id="E_total_inst" type="number" class="field" placeholder="12" min="1" max="60" oninput="updateInstSel()"/></div>
+        <div class="flex-1"><label class="text-xs text-gray-500 block mb-1">Cuota actual Nº</label><select id="E_cur_inst" class="field"><option value="1">1</option></select></div>
+      </div>
+      <label class="flex items-center gap-2 text-sm font-medium cursor-pointer">
+        <input type="checkbox" id="E_has_int" class="w-4 h-4 rounded" onchange="toggleIntRate()"/> Con interés (CFT)
+      </label>
+      <input id="E_int_rate" type="number" class="field hidden" placeholder="Tasa mensual de interés %" step="0.01"/>
+    </div>
+    <button onclick="saveExpense()" class="btn btn-primary w-full">Guardar gasto</button>
+  </div>
+</div>
+
+<!-- CARD MODAL -->
+<div id="M_card" class="modal-wrap hidden" onclick="bgClose(event,'M_card')">
+  <div class="modal-box space-y-3">
+    <div class="flex justify-between items-center"><h3 id="M_card_title" class="font-extrabold text-lg">Nueva Tarjeta</h3><button onclick="closeModal('M_card')" class="text-3xl text-gray-400 font-thin leading-none">×</button></div>
+    <input id="C_name" type="text" class="field" placeholder="Nombre (ej: Visa Galicia, MC BBVA)"/>
+    <input id="C_limit" type="number" class="field" placeholder="Límite de crédito (ARS)"/>
+    <input id="C_balance" type="number" class="field" placeholder="Deuda actual (ARS)"/>
+    <input id="C_minpay" type="number" class="field" placeholder="Pago mínimo mensual (ARS)"/>
+    <input id="C_intrate" type="number" class="field" placeholder="Tasa interés mensual % (ej: 8.5)" step="0.01"/>
+    <label class="text-xs text-gray-500 font-semibold block -mb-1">Fecha de vencimiento del resumen</label>
+    <input id="C_due" type="date" class="field"/>
+    <button onclick="saveCard()" class="btn btn-primary w-full">Guardar tarjeta</button>
+  </div>
+</div>
+
+<!-- BUDGET MODAL -->
+<div id="M_budget" class="modal-wrap hidden" onclick="bgClose(event,'M_budget')">
+  <div class="modal-box space-y-3">
+    <div class="flex justify-between items-center"><h3 class="font-extrabold text-lg">Presupuesto mensual</h3><button onclick="closeModal('M_budget')" class="text-3xl text-gray-400 font-thin leading-none">×</button></div>
+    <select id="B_cat" class="field"></select>
+    <input id="B_amount" type="number" class="field" placeholder="Límite mensual (ARS)"/>
+    <input id="B_month" type="month" class="field"/>
+    <button onclick="saveBudget()" class="btn btn-primary w-full">Guardar presupuesto</button>
+  </div>
+</div>
+
+<!-- GOAL MODAL -->
+<div id="M_goal" class="modal-wrap hidden" onclick="bgClose(event,'M_goal')">
+  <div class="modal-box space-y-3">
+    <div class="flex justify-between items-center"><h3 class="font-extrabold text-lg">Nueva Meta de Ahorro</h3><button onclick="closeModal('M_goal')" class="text-3xl text-gray-400 font-thin leading-none">×</button></div>
+    <input id="G_name" type="text" class="field" placeholder="Nombre (ej: Fondo emergencia, Auto)"/>
+    <input id="G_target" type="number" class="field" placeholder="Monto objetivo (ARS)"/>
+    <input id="G_current" type="number" class="field" placeholder="Ahorro actual (ARS)"/>
+    <input id="G_date" type="date" class="field"/>
+    <button onclick="saveGoal()" class="btn btn-primary w-full">Guardar meta</button>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div id="M_import" class="modal-wrap hidden" onclick="bgClose(event,'M_import')">
+  <div class="modal-box space-y-3">
+    <div class="flex justify-between items-center"><h3 class="font-extrabold text-lg">📥 Importar CSV</h3><button onclick="closeModal('M_import')" class="text-3xl text-gray-400 font-thin leading-none">×</button></div>
+    <div class="rounded-xl p-3 text-xs bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300">
+      <p class="font-bold mb-1">Formato CSV (encabezado opcional):</p>
+      <p class="mono">fecha,monto,categoría,descripción</p>
+      <p class="mt-1 opacity-70 mono">2024-03-15,12500,supermercado,Coto</p>
+    </div>
+    <input type="file" id="IMP_file" accept=".csv,.txt" class="field" onchange="previewImport(event)"/>
+    <div id="IMP_preview" class="hidden">
+      <p class="text-sm font-bold mb-2">Vista previa: <span id="IMP_count">0</span> registros</p>
+      <div id="IMP_list" class="max-h-40 overflow-y-auto space-y-1"></div>
+    </div>
+    <button onclick="doImport()" class="btn btn-primary w-full">Importar todos</button>
+  </div>
+</div>
+
+<!-- PDF ANALYZER MODAL -->
+<div id="M_pdf" class="modal-wrap hidden" onclick="bgClose(event,'M_pdf')">
+  <div class="modal-box space-y-3">
+    <div class="flex justify-between items-center"><h3 class="font-extrabold text-lg">📄 Analizador de Resumen</h3><button onclick="closeModal('M_pdf')" class="text-3xl text-gray-400 font-thin leading-none">×</button></div>
+    <div class="rounded-xl p-3 text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 space-y-1">
+      <p class="font-bold">Soporta: Visa, Mastercard, Galicia, BBVA, Santander, HSBC, ICBC, Naranja, Brubank.</p>
+      <p class="opacity-70">El algoritmo detecta automáticamente gastos en 1 pago y en cuotas, montos, fechas y comercios.</p>
+    </div>
+    <select id="PDF_card" class="field"></select>
+    <input type="file" id="PDF_file" accept=".pdf" class="field" onchange="analyzePDF(event)"/>
+    <!-- Loading state -->
+    <div id="PDF_loading" class="hidden flex flex-col items-center py-6 gap-3">
+      <div class="spinner"></div>
+      <p class="text-sm text-gray-400" id="PDF_load_msg">Extrayendo texto del PDF...</p>
+    </div>
+    <!-- Results -->
+    <div id="PDF_results" class="hidden space-y-3">
+      <!-- Summary -->
+      <div id="PDF_summary" class="rounded-xl p-3 text-xs bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 space-y-0.5"></div>
+      <div class="flex justify-between items-center">
+        <p class="text-sm font-bold">Gastos detectados (<span id="PDF_det_count">0</span>)</p>
+        <label class="text-xs text-gray-400 cursor-pointer flex items-center gap-1">
+          <input type="checkbox" id="PDF_selall" onchange="toggleAllPDF(this)" class="rounded" checked/> Todos
+        </label>
+      </div>
+      <div id="PDF_list" class="max-h-64 overflow-y-auto space-y-2"></div>
+      <button onclick="importPDFExpenses()" class="btn btn-primary w-full">Importar seleccionados</button>
+    </div>
+    <p id="PDF_err" class="hidden text-red-500 text-xs text-center"></p>
+  </div>
+</div>
+
+<!-- ALERTS MODAL -->
+<div id="M_alerts" class="modal-wrap hidden" onclick="bgClose(event,'M_alerts')">
+  <div class="modal-box space-y-2">
+    <div class="flex justify-between items-center mb-2"><h3 class="font-extrabold text-lg">🔔 Alertas</h3><button onclick="closeModal('M_alerts')" class="text-3xl text-gray-400 font-thin leading-none">×</button></div>
+    <div id="ALERTS_list" class="space-y-2 max-h-80 overflow-y-auto"></div>
+    <button onclick="markAlertsRead()" class="btn btn-ghost w-full mt-1 text-sm">✓ Marcar todas como leídas</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="TOAST" class="toast-el hidden"></div>
+
+<script>
+// =============================================================
+// FIREBASE — dynamic initialization (Firebase v9 compat CDN)
+// =============================================================
+
+// ── VISUAL FEEDBACK & DOM HELPERS ──────────────────────────────
+
+// forceRepaint: uses opacity trick (no flash) to force compositor flush
+// Critical for GitHub Pages / Android WebView where DOM updates don't auto-paint
+function forceRepaint(el){
+  const target = el || document.getElementById('APP') || document.documentElement;
+  // Read a layout property to flush pending style updates, then force a composite
+  void target.offsetHeight;
+  // Use transform trick — doesn't cause reflow but forces a paint
+  target.style.transform = 'translateZ(0)';
+  requestAnimationFrame(()=>{ target.style.transform = ''; });
+}
+
+// Add tap feedback to a button element
+function btnFeedback(el){
+  if(!el) return;
+  el.classList.add('btn-tapped');
+  // Force the class to be painted before removing it
+  void el.offsetWidth;
+  setTimeout(()=>{
+    el.classList.remove('btn-tapped');
+    void el.offsetWidth;
+  }, 160);
+}
+
+// Wrapper: give browser ONE frame to paint the tap, then run fn
+function tapThen(el, fn){
+  btnFeedback(el);
+  requestAnimationFrame(()=>requestAnimationFrame(fn));
+}
+
+// Global delegated handler — adds tap feedback to ALL buttons and nav items
+document.addEventListener('pointerdown', e=>{
+  const btn = e.target.closest('.btn, .nav-btn');
+  if(btn){ btnFeedback(btn); }
+}, {passive:true});
+
+// Also handle plain <button> elements that aren't .btn
+document.addEventListener('pointerdown', e=>{
+  if(e.target.tagName==='BUTTON' && !e.target.closest('.btn') && !e.target.closest('.nav-btn')){
+    const b = e.target;
+    b.style.opacity = '0.55';
+    b.style.transform = 'scale(0.91)';
+    setTimeout(()=>{ b.style.opacity=''; b.style.transform=''; }, 150);
+  }
+}, {passive:true});
+
+// scheduleRender: ensures DOM mutations are painted before fn runs
+// Double-RAF + microtask flush is the most reliable pattern for GitHub Pages
+function scheduleRender(fn){
+  // Flush any pending microtasks first, then paint
+  Promise.resolve().then(()=>{
+    requestAnimationFrame(()=>{
+      fn();
+      // Second RAF ensures the result of fn() is also painted
+      requestAnimationFrame(()=>{ void document.body.offsetHeight; });
+    });
+  });
+}
+let FB = { app:null, auth:null, db:null, ready:false, authOk:null, unsubscribers:[] };
+// authOk: null = unknown, true = Email/Password enabled, false = provider not enabled
+
+// Track whether Firebase scripts are already loading/loaded
+let _fbScriptsLoaded = false;
+let _fbScriptsPromise = null;
+
+async function loadFirebaseScripts(){
+  // Return cached promise if already loading/loaded
+  if(_fbScriptsLoaded) return;
+  if(_fbScriptsPromise) return _fbScriptsPromise;
+
+  _fbScriptsPromise = (async()=>{
+    const scripts=[
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js',
+      'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js'
+    ];
+    for(const src of scripts){
+      // Skip if script tag already present
+      if(document.querySelector(`script[src="${src}"]`)){
+        // Wait for it to be loaded if already injected
+        await new Promise(res=>{
+          const existing=document.querySelector(`script[src="${src}"]`);
+          if(existing.dataset.loaded) return res();
+          existing.addEventListener('load',()=>{existing.dataset.loaded='1';res();},{once:true});
+          // If it might have loaded already synchronously
+          setTimeout(res,50);
+        });
+        continue;
+      }
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src=src;
+        s.dataset.loaded='';
+        s.onload=()=>{s.dataset.loaded='1';res();};
+        s.onerror=()=>rej(new Error('No se pudo cargar: '+src));
+        document.head.appendChild(s);
+      });
+    }
+    _fbScriptsLoaded=true;
+  })();
+
+  return _fbScriptsPromise;
+}
+
+async function initFirebase(cfg){
+  // ── Strict config validation before touching Firebase ──────
+  if(!cfg||typeof cfg!=='object') return false;
+  const {apiKey,projectId,authDomain}=cfg;
+  if(!apiKey||!projectId||!authDomain) return false;
+  // Sanity check: apiKey should start with "AIza"
+  if(!apiKey.startsWith('AIza')){
+    updateFBStatusUI(false,'API Key inválida (debe comenzar con "AIza")');
+    return false;
+  }
+  // projectId should not contain spaces or special chars
+  if(!/^[a-zA-Z0-9_-]+$/.test(projectId)){
+    updateFBStatusUI(false,'projectId inválido');
+    return false;
+  }
+
+  try{
+    await loadFirebaseScripts();
+
+    // If already initialized with same projectId, reuse existing instance
+    if(FB.ready && FB.app){
+      try{
+        if(firebase.app().options.projectId===projectId){
+          updateFBStatusUI(true);
+          return true;
+        }
+      }catch{}
+    }
+
+    // Delete all existing app instances to allow fresh init
+    if(typeof firebase!=='undefined'){
+      for(const app of [...firebase.apps]){
+        await app.delete().catch(()=>{});
+      }
+    }
+
+    firebase.initializeApp(cfg);
+    FB.app  = firebase.app();
+    FB.auth = firebase.auth();
+    FB.db   = firebase.firestore();
+
+    // Enable offline persistence (ignore already-enabled or unsupported errors)
+    FB.db.enablePersistence({synchronizeTabs:true}).catch(err=>{
+      if(err.code!=='failed-precondition'&&err.code!=='unimplemented')
+        console.warn('Persistence error:',err.code);
+    });
+
+    FB.auth.useDeviceLanguage();
+    FB.ready=true;
+    updateFBStatusUI(true);
+    return true;
+
+  }catch(e){
+    console.warn('Firebase init error:',e.code||e.message);
+    // Don't propagate — just mark as not ready and return false
+    FB.ready=false;
+    // Only show error message for non-trivial errors
+    const code=e.code||'';
+    if(code==='auth/invalid-api-key'||code==='auth/invalid-app-credential'){
+      updateFBStatusUI(false,'API Key inválida. Revisá la configuración.');
+    }else{
+      updateFBStatusUI(false, e.message||code);
+    }
+    return false;
+  }
+}
+
+function updateFBStatusUI(connected, msg=''){
+  // --- Determine actual state ---
+  // State A: connected + auth ok (or unknown) → green
+  // State B: connected + auth NOT ok → amber warning
+  // State C: not connected → red/gray
+  const authWarning = connected && FB.authOk===false;
+
+  // --- Badge in Settings ---
+  const badge=document.getElementById('FB_status_badge');
+  if(badge){
+    if(authWarning){
+      badge.innerHTML='<span class="fb-dot bg-amber-400"></span> Auth no habilitado';
+      badge.className='badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 text-xs';
+    }else if(connected){
+      badge.innerHTML='<span class="fb-dot bg-green-400"></span> Conectado';
+      badge.className='badge bg-green-50 dark:bg-green-900/30 text-green-600 text-xs';
+    }else{
+      badge.innerHTML='<span class="fb-dot bg-red-400"></span> Sin conectar';
+      badge.className='badge bg-red-50 dark:bg-red-900/30 text-red-500 text-xs';
+    }
+  }
+  // --- Show/hide connected vs disconnected form in Settings ---
+  const connView=document.getElementById('FB_connected_view');
+  const discView=document.getElementById('FB_disconnected_view');
+  if(connView) connView.classList.toggle('hidden', !connected);
+  if(discView) discView.classList.toggle('hidden', connected);
+  if(connected){
+    const cfg=LG('fb_config',{});
+    const pidEl=document.getElementById('FB_connected_pid');
+    if(pidEl&&cfg.projectId) pidEl.textContent='Proyecto: '+cfg.projectId;
+  }
+  // --- Auth screen pill ---
+  const authStatus=document.getElementById('AUTH_fb_status');
+  if(authStatus){
+    authStatus.classList.remove('hidden');
+    if(authWarning){
+      authStatus.className='mb-3 flex items-center gap-2 text-xs px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 shadow-sm';
+      authStatus.innerHTML='<span class="fb-dot bg-amber-400"></span><span class="text-amber-700 dark:text-amber-400 font-semibold">⚠️ Firebase sin Auth — modo local activo</span>';
+    }else if(connected){
+      authStatus.className='mb-3 flex items-center gap-2 text-xs px-3 py-2 rounded-xl bg-green-50 dark:bg-green-900/20 shadow-sm';
+      authStatus.innerHTML='<span class="fb-dot bg-green-400"></span><span class="text-green-600 dark:text-green-400 font-semibold">🔥 Firebase conectado</span>';
+    }else{
+      authStatus.className='mb-3 flex items-center gap-2 text-xs px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-800 shadow-sm';
+      authStatus.innerHTML='<span class="fb-dot bg-gray-300"></span><span class="text-gray-500 font-semibold">☁️ Sin Firebase — modo local</span>';
+    }
+  }
+  // --- Topbar dot ---
+  const tbDot=document.getElementById('TB_fb_dot');
+  if(tbDot){
+    tbDot.classList.remove('hidden');
+    tbDot.style.background=connected?(authWarning?'#fbbf24':'#4ade80'):'#9ca3af';
+  }
+  // --- Hint text in Settings ---
+  const hint=document.getElementById('FB_hint');
+  if(hint){
+    if(authWarning&&!msg){
+      // Auth-specific warning
+      hint.innerHTML='⚠️ Firestore OK, pero Email/Password no habilitado.<br>' +
+        '<strong>Activar:</strong> Firebase Console → Authentication → Sign-in method → Email/Password → Habilitar.<br>' +
+        'Mientras tanto, la app usa modo local.';
+      hint.className='text-xs text-amber-600 dark:text-amber-400 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20';
+      hint.classList.remove('hidden');
+    }else if(msg){
+      hint.textContent=connected&&!authWarning?'✅ Firebase y Auth verificados':'❌ '+msg;
+      hint.className='text-xs text-gray-400';
+      hint.classList.remove('hidden');
+    }else{
+      hint.classList.add('hidden');
+    }
+  }
+}
+
+// =============================================================
+// FIRESTORE helpers — CRUD with localStorage fallback
+// =============================================================
+async function fbSet(col,id,data){
+  if(FB.ready&&FB.db){
+    try{await FB.db.collection(col).doc(id).set({...data,updatedAt:new Date().toISOString()},{merge:true});return;}catch(e){console.warn('fbSet err:',e);}
+  }
+}
+async function fbGet(col,id){
+  if(FB.ready&&FB.db){
+    try{const d=await FB.db.collection(col).doc(id).get();return d.exists?{id:d.id,...d.data()}:null;}catch{}
+  }
+  return null;
+}
+async function fbGetAll(col,field,val){
+  if(FB.ready&&FB.db){
+    try{const s=await FB.db.collection(col).where(field,'==',val).get();return s.docs.map(d=>({id:d.id,...d.data()}));}catch{}
+  }
+  return [];
+}
+async function fbDelete(col,id){
+  if(FB.ready&&FB.db){try{await FB.db.collection(col).doc(id).delete();}catch{}}
+}
+
+// Real-time sync for expenses of the current user
+function subscribeExpenses(userId){
+  if(!FB.ready||!FB.db)return;
+  // Unsubscribe previous listeners
+  FB.unsubscribers.forEach(fn=>fn());
+  FB.unsubscribers=[];
+  const unsub=FB.db.collection('expenses').where('userId','==',userId)
+    .onSnapshot(snap=>{
+      const exps=snap.docs.map(d=>({id:d.id,...d.data()}));
+      S.expenses=exps;
+      LS('exp_'+userId,exps);
+      if(currentPage==='dashboard')renderDashboard();
+      else if(currentPage==='expenses')renderExpenses();
+    },e=>console.warn('expenses sub err:',e));
+  FB.unsubscribers.push(unsub);
+}
+
+// =============================================================
+// i18n
+// =============================================================
+const I18N={
+  es:{income:'Ingresos',expense:'Gastos',balance:'Balance',debt:'Deuda',
+    noExpenses:'Sin gastos en este período',noCards:'No hay tarjetas',
+    noBudgets:'Sin presupuestos definidos',noGoals:'Sin metas de ahorro',
+    expAdded:'✅ Gasto guardado',expDeleted:'🗑 Gasto eliminado',
+    cardAdded:'✅ Tarjeta guardada',cardDeleted:'🗑 Tarjeta eliminada',
+    budgetAdded:'✅ Presupuesto guardado',goalAdded:'✅ Meta guardada',
+    profileSaved:'✅ Perfil guardado',codeCopied:'📋 Código copiado'},
+  en:{income:'Income',expense:'Expenses',balance:'Balance',debt:'Debt',
+    noExpenses:'No expenses this period',noCards:'No cards added',
+    noBudgets:'No budgets defined',noGoals:'No savings goals',
+    expAdded:'✅ Expense saved',expDeleted:'🗑 Expense deleted',
+    cardAdded:'✅ Card saved',cardDeleted:'🗑 Card deleted',
+    budgetAdded:'✅ Budget saved',goalAdded:'✅ Goal saved',
+    profileSaved:'✅ Profile saved',codeCopied:'📋 Code copied'}
+};
+let LANG=localStorage.getItem('ff_lang')||'es';
+const t=k=>(I18N[LANG]||I18N.es)[k]||k;
+function toggleLang(){LANG=LANG==='es'?'en':'es';localStorage.setItem('ff_lang',LANG);applyLang();renderCurrentPage();}
+function applyLang(){
+  document.documentElement.lang=LANG;
+  const lb=document.getElementById('LANG_BTN'),la=document.getElementById('LANG_AUTH');
+  if(lb)lb.textContent=LANG==='es'?'EN':'ES';
+  if(la)la.textContent=LANG==='es'?'EN':'ES';
+}
+
+// =============================================================
+// DARK MODE
+// =============================================================
+function initDark(){
+  const saved=localStorage.getItem('ff_dark');
+  const sys=window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const dark=saved!==null?saved==='1':sys;
+  document.documentElement.classList.toggle('dark',dark);
+  updateDarkUI(dark);
+}
+function toggleDark(){
+  const dark=document.documentElement.classList.toggle('dark');
+  localStorage.setItem('ff_dark',dark?'1':'0');
+  updateDarkUI(dark);
+  // Redraw charts with new colors
+  setTimeout(()=>{ if(currentPage==='dashboard')renderDashboard(); else renderCurrentPage(); },50);
+}
+function updateDarkUI(dark){
+  const i=document.getElementById('DARK_ICON');if(i)i.textContent=dark?'☀️':'🌙';
+  const da=document.getElementById('DARK_AUTH');if(da)da.textContent=dark?'Claro':'Oscuro';
+}
+
+// =============================================================
+// STATE
+// =============================================================
+let S={user:null,family:null,members:[],expenses:[],cards:[],budgets:[],goals:[],alerts:[],month:new Date(),editExpId:null,editCardId:null};
+let currentPage='dashboard';
+let expFilterMode='all';
+let importBuf=[];
+let charts={};
+
+// Categories with AR context
+const CATS=[
+  {id:'alimentos',  es:'Alimentos',         en:'Food',           e:'🍎',c:'#f97316'},
+  {id:'transporte', es:'Transporte',        en:'Transport',      e:'🚗',c:'#3b82f6'},
+  {id:'servicios',  es:'Servicios',         en:'Services',       e:'⚡',c:'#eab308'},
+  {id:'salud',      es:'Salud',             en:'Health',         e:'🏥',c:'#ef4444'},
+  {id:'educacion',  es:'Educación',         en:'Education',      e:'📚',c:'#8b5cf6'},
+  {id:'entretenimiento',es:'Entretenimiento',en:'Entertainment', e:'🎬',c:'#ec4899'},
+  {id:'supermercado',es:'Supermercado',     en:'Supermarket',    e:'🛒',c:'#10b981'},
+  {id:'alquiler',   es:'Alquiler',          en:'Rent',           e:'🏠',c:'#6366f1'},
+  {id:'impuestos',  es:'Impuestos',         en:'Taxes',          e:'📋',c:'#64748b'},
+  {id:'otros',      es:'Otros',             en:'Other',          e:'📦',c:'#94a3b8'},
+];
+const catName=id=>{const c=CATS.find(x=>x.id===id);return c?(LANG==='es'?c.es:c.en):id;};
+const catEmoji=id=>(CATS.find(x=>x.id===id)||{e:'📦'}).e;
+const catColor=id=>(CATS.find(x=>x.id===id)||{c:'#94a3b8'}).c;
+
+// Month helpers
+const MES={es:['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+           en:['January','February','March','April','May','June','July','August','September','October','November','December']};
+const monthLabel=d=>(MES[LANG]||MES.es)[d.getMonth()]+' '+d.getFullYear();
+const monShort=(d,n=0)=>{const x=new Date(d.getFullYear(),d.getMonth()+n,1);return (MES[LANG]||MES.es)[x.getMonth()].substring(0,3)+'\''+String(x.getFullYear()).substr(2);};
+const monthStr=(d)=>{const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0');};
+
+// Format helpers
+const fmtARS=n=>{if(n===undefined||n===null||isNaN(n))return '$0';const abs=Math.abs(n);const s='$'+(abs>=1000000?(abs/1000000).toFixed(1)+'M':abs>=1000?(abs/1000).toFixed(0)+'K':Math.round(abs).toLocaleString('es-AR'));return n<0?'-'+s:s;};
+const fmtFull=n=>'$'+(Math.round(n||0)).toLocaleString('es-AR');
+const fmtDate=s=>{if(!s)return '';try{const d=new Date(s+'T00:00:00');return d.toLocaleDateString(LANG==='es'?'es-AR':'en-US',{day:'2-digit',month:'2-digit',year:'2-digit'});}catch{return s;}};
+const sameMonth=(ds,d)=>{try{const x=new Date(ds+'T00:00:00');return x.getMonth()===d.getMonth()&&x.getFullYear()===d.getFullYear();}catch{return false;}};
+const uid=()=>'id_'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);
+const today=()=>new Date().toISOString().split('T')[0];
+
+// =============================================================
+// PERSISTENCE — localStorage
+// =============================================================
+const LS=(k,v)=>{try{localStorage.setItem('ff_'+k,JSON.stringify(v));}catch{}};
+const LG=(k,def)=>{try{const v=localStorage.getItem('ff_'+k);return v!==null?JSON.parse(v):def;}catch{return def;}};
+
+function persist(){
+  if(!S.user)return;
+  const id=S.user.id;
+  LS('u_'+id,S.user);
+  LS('exp_'+id,S.expenses);
+  LS('card_'+id,S.cards);
+  LS('bud_'+id,S.budgets);
+  LS('goal_'+id,S.goals);
+  LS('alert_'+id,S.alerts);
+  if(S.family)LS('fam_'+id,S.family);
+  if(S.members)LS('mem_'+id,S.members);
+}
+
+function loadForUser(id){
+  const u=LG('u_'+id,null);if(u)S.user=u;
+  S.expenses=LG('exp_'+id,[]);
+  S.cards=LG('card_'+id,[]);
+  S.budgets=LG('bud_'+id,[]);
+  S.goals=LG('goal_'+id,[]);
+  S.alerts=LG('alert_'+id,[]);
+  S.family=LG('fam_'+id,null);
+  S.members=LG('mem_'+id,[]);
+}
+
+// Load from Firestore and merge into state
+async function syncFromFirestore(userId, familyId){
+  if(!FB.ready)return;
+  try{
+    // User profile
+    const fu=await fbGet('users',userId);
+    if(fu){Object.assign(S.user,fu);LS('u_'+userId,S.user);}
+    // Expenses
+    const exps=await fbGetAll('expenses','userId',userId);
+    if(exps.length){S.expenses=exps;LS('exp_'+userId,exps);}
+    // Cards
+    const cards=await fbGetAll('cards','userId',userId);
+    if(cards.length){S.cards=cards;LS('card_'+userId,cards);}
+    // Budgets
+    const buds=await fbGetAll('budgets','userId',userId);
+    if(buds.length){S.budgets=buds;LS('bud_'+userId,buds);}
+    // Goals
+    const goals=await fbGetAll('goals','userId',userId);
+    if(goals.length){S.goals=goals;LS('goal_'+userId,goals);}
+    // Family
+    if(familyId){
+      const fam=await fbGet('families',familyId);
+      if(fam){S.family=fam;LS('fam_'+userId,fam);}
+      // Members
+      const memberDocs=await Promise.all((fam?.members||[]).map(mid=>fbGet('users',mid)));
+      const validMembers=memberDocs.filter(Boolean);
+      if(validMembers.length){S.members=validMembers;LS('mem_'+userId,validMembers);}
+    }
+  }catch(e){console.warn('Sync error:',e);}
+}
+
+// =============================================================
+// AUTH — Firebase + local fallback
+// =============================================================
+function authTab(tab){
+  ['login','register'].forEach(t=>{
+    document.getElementById('FORM_'+t).classList.toggle('hidden',t!==tab);
+    const btn=document.getElementById('TAB_'+t);
+    btn.className='flex-1 py-2 rounded-xl text-sm font-bold transition-all '+(t===tab?'bg-white dark:bg-gray-700 text-orange-600 shadow-sm':'text-gray-400');
+  });
+  document.getElementById('JOIN_form').classList.add('hidden');
+}
+function showJoinForm(){document.getElementById('JOIN_form').classList.toggle('hidden');}
+
+// Firebase Auth login
+async function doLogin(){
+  const email=document.getElementById('l_email').value.trim();
+  const pass=document.getElementById('l_pass').value;
+  if(!email||!pass){showErr('l_err','Completa email y contraseña');return;}
+
+  const btn=document.querySelector('#FORM_login .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Entrando...';}
+
+  try{
+    // ── Firebase path ──────────────────────────────────────────
+    if(FB.ready&&FB.auth&&FB.authOk!==false){
+      try{
+        const cred=await FB.auth.signInWithEmailAndPassword(email,pass);
+        const fbUser=cred.user;
+        FB.authOk=true; // confirmed working
+        let profile=await fbGet('users',fbUser.uid)||{};
+        const user={
+          id:fbUser.uid,
+          name:profile.name||fbUser.displayName||email.split('@')[0],
+          email:fbUser.email||email,
+          salary:profile.salary||0,
+          inflationRate:profile.inflationRate||5,
+          familyId:profile.familyId||null,
+          role:profile.role||'member'
+        };
+        if(!profile.id) await fbSet('users',fbUser.uid,user);
+        await loginSuccess(user);
+        return;
+      }catch(e){
+        const code=e.code||'';
+        if(code==='auth/configuration-not-found'||code==='auth/admin-restricted-operation'){
+          // Email/Password provider not enabled → mark and fall through to local
+          handleAuthNotConfigured();
+          updateFBStatusUI(true); // keep firebase "connected" (Firestore still works)
+          // Fall through below to local login
+        }else if(code==='auth/network-request-failed'){
+          showErr('l_err','Sin conexión a internet.');
+          return;
+        }else{
+          // Real auth error: wrong password, user not found, etc.
+          showErr('l_err', fbErrMsg(e));
+          return;
+        }
+      }
+    }
+
+    // ── Local fallback ─────────────────────────────────────────
+    const users=LG('local_users',[]);
+    const u=users.find(x=>x.email===email&&x.pw===btoa(unescape(encodeURIComponent(pass))));
+    if(u){
+      await loginSuccess(u);
+    }else{
+      // If auth is not configured, give a helpful hint
+      if(FB.authOk===false){
+        showErr('l_err','Firebase Auth no habilitado. Registrate en modo local primero o habilitá Email/Password en Firebase Console.');
+      }else{
+        showErr('l_err','Email o contraseña incorrectos.');
+      }
+    }
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Entrar';}
+  }
+}
+
+// Firebase Google sign-in
+async function doGoogle(){
+  if(!FB.ready||!FB.auth){
+    showErr('l_err','⚙️ Configura Firebase en Ajustes para usar Google.');
+    return;
+  }
+  if(FB.authOk===false){
+    showErr('l_err','⚙️ Habilitá Google en Firebase Console → Authentication → Sign-in method → Google.');
+    return;
+  }
+  try{
+    const provider=new firebase.auth.GoogleAuthProvider();
+    provider.addScope('email');
+    const cred=await FB.auth.signInWithPopup(provider);
+    const fbUser=cred.user;
+    FB.authOk=true;
+
+    let profile=await fbGet('users',fbUser.uid);
+    if(!profile){
+      const famCode='FAM-'+Math.random().toString(36).substr(2,8).toUpperCase();
+      profile={id:fbUser.uid,name:fbUser.displayName||'Usuario',email:fbUser.email,
+        salary:0,inflationRate:5,familyId:famCode,role:'admin'};
+      const fam={id:famCode,name:(fbUser.displayName||'Mi').split(' ')[0]+"'s Familia",
+        code:famCode,members:[fbUser.uid],createdAt:new Date().toISOString()};
+      await fbSet('users',fbUser.uid,profile);
+      await fbSet('families',famCode,fam);
+      S.family=fam; S.members=[{...profile}];
+      loadSampleData();
+      for(const e of S.expenses) await fbSet('expenses',e.id,{...e,userId:fbUser.uid});
+      for(const c of S.cards)    await fbSet('cards',c.id,{...c,userId:fbUser.uid});
+    }
+    await loginSuccess(profile);
+  }catch(e){
+    const code=e.code||'';
+    if(code==='auth/configuration-not-found'||code==='auth/admin-restricted-operation'){
+      handleAuthNotConfigured();
+      updateFBStatusUI(true);
+      showErr('l_err','Google Sign-In no habilitado. Ve a Firebase Console → Authentication → Google → Activar.');
+    }else{
+      showErr('l_err', fbErrMsg(e));
+    }
+  }
+}
+
+// Register new account + new family
+async function doRegisterNew(){
+  const name  =document.getElementById('r_name').value.trim();
+  const email =document.getElementById('r_email').value.trim();
+  const pass  =document.getElementById('r_pass').value;
+  const salary=parseFloat(document.getElementById('r_salary').value)||0;
+  if(!name||!email||pass.length<6){
+    showErr('r_err','Completa todos los campos (contraseña mín. 6 caracteres)');
+    return;
+  }
+
+  const famCode='FAM-'+Math.random().toString(36).substr(2,8).toUpperCase();
+  const btn=document.querySelector('#FORM_register .btn-primary:last-of-type');
+  if(btn){btn.disabled=true;btn.textContent='Registrando...';}
+
+  try{
+    // ── Firebase path ──────────────────────────────────────────
+    if(FB.ready&&FB.auth&&FB.authOk!==false){
+      try{
+        const cred=await FB.auth.createUserWithEmailAndPassword(email,pass);
+        await cred.user.updateProfile({displayName:name}).catch(()=>{});
+        FB.authOk=true;
+
+        const user={id:cred.user.uid,name,email,salary,inflationRate:5,familyId:famCode,role:'admin'};
+        const fam ={id:famCode,name:name.split(' ')[0]+"'s Familia",code:famCode,
+                    members:[cred.user.uid],createdAt:new Date().toISOString()};
+        await fbSet('users',cred.user.uid,user);
+        await fbSet('families',famCode,fam);
+        S.user=user; S.family=fam; S.members=[{...user}];
+        loadSampleData();
+        for(const e of S.expenses) await fbSet('expenses',e.id,{...e,userId:cred.user.uid});
+        for(const c of S.cards)    await fbSet('cards',c.id,{...c,userId:cred.user.uid});
+        persist();
+        await loginSuccess(user);
+        return;
+      }catch(e){
+        const code=e.code||'';
+        if(code==='auth/configuration-not-found'||code==='auth/admin-restricted-operation'){
+          // Email/Password provider not enabled → fall through to local
+          handleAuthNotConfigured();
+          updateFBStatusUI(true);
+          // Show info pill briefly, then proceed to local registration silently
+          await new Promise(r=>setTimeout(r,600));
+          // Fall through below to local registration
+        }else if(code==='auth/email-already-in-use'){
+          showErr('r_err','Ya existe una cuenta con ese email. Usá "Entrar".');
+          return;
+        }else{
+          showErr('r_err', fbErrMsg(e));
+          return;
+        }
+      }
+    }
+
+    // ── Local fallback ─────────────────────────────────────────
+    const users=LG('local_users',[]);
+    if(users.find(x=>x.email===email)){
+      showErr('r_err','Email ya registrado localmente. Usá "Entrar".');
+      return;
+    }
+    const id='u_'+Date.now();
+    const fam={id:famCode,name:name.split(' ')[0]+"'s Familia",code:famCode,
+               members:[id],createdAt:new Date().toISOString()};
+    const user={id,name,email,salary,inflationRate:5,familyId:famCode,role:'admin'};
+    users.push({...user,pw:btoa(unescape(encodeURIComponent(pass)))});
+    LS('local_users',users);
+    S.user=user; S.family=fam; S.members=[{...user}];
+    loadSampleData(); persist();
+    if(FB.authOk===false){
+      toast('✅ Registrado en modo local — habilitá Email/Password en Firebase Console para sync en la nube',5000);
+    }
+    await loginSuccess(user);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Nueva familia';}
+  }
+}
+
+// Join existing family by code
+async function doJoinFamily(){
+  const name  =document.getElementById('r_name').value.trim();
+  const email =document.getElementById('r_email').value.trim();
+  const pass  =document.getElementById('r_pass').value;
+  const code  =(document.getElementById('r_code').value||'').trim().toUpperCase();
+  const salary=parseFloat(document.getElementById('r_salary').value)||0;
+  if(!name||!email||pass.length<6||!code){showErr('r_err','Completa todos los campos');return;}
+
+  if(FB.ready&&FB.auth&&FB.db&&FB.authOk!==false){
+    try{
+      const snap=await FB.db.collection('families').where('code','==',code).get();
+      if(snap.empty){showErr('r_err','Código de familia no encontrado en la nube. ¿Está bien escrito?');return;}
+      const famDoc=snap.docs[0];
+      const fam={id:famDoc.id,...famDoc.data()};
+      const cred=await FB.auth.createUserWithEmailAndPassword(email,pass);
+      await cred.user.updateProfile({displayName:name}).catch(()=>{});
+      FB.authOk=true;
+      const user={id:cred.user.uid,name,email,salary,inflationRate:5,familyId:fam.id,role:'member'};
+      await fbSet('users',cred.user.uid,user);
+      fam.members=[...(fam.members||[]),cred.user.uid];
+      await fbSet('families',fam.id,fam);
+      S.user=user; S.family=fam;
+      await loginSuccess(user);
+      return;
+    }catch(e){
+      const code2=e.code||'';
+      if(code2==='auth/configuration-not-found'||code2==='auth/admin-restricted-operation'){
+        handleAuthNotConfigured();
+        updateFBStatusUI(true);
+        // Fall through to local
+      }else{
+        showErr('r_err', fbErrMsg(e));
+        return;
+      }
+    }
+  }
+
+  // Local fallback
+  let fam=null;
+  for(const k of Object.keys(localStorage)){
+    if(k.startsWith('ff_fam_')){
+      try{const f=JSON.parse(localStorage.getItem(k));if(f&&f.code===code){fam=f;break;}}catch{}
+    }
+  }
+  if(!fam){showErr('r_err','Código no encontrado localmente. ¿Está bien escrito?');return;}
+  const id='u_'+Date.now();
+  const user={id,name,email,salary,inflationRate:5,familyId:fam.id,role:'member'};
+  fam.members=[...(fam.members||[]),id];
+  const users=LG('local_users',[]);
+  users.push({...user,pw:btoa(unescape(encodeURIComponent(pass)))});
+  LS('local_users',users);
+  S.user=user; S.family=fam;
+  persist(); await loginSuccess(user);
+}
+
+// Translate Firebase Auth error codes to friendly Spanish messages
+function fbErrMsg(e){
+  const code=e.code||'';
+  const msg=e.message||'';
+  const map={
+    'auth/user-not-found':'No existe una cuenta con ese email.',
+    'auth/wrong-password':'Contraseña incorrecta.',
+    'auth/invalid-credential':'Credenciales inválidas. Revisá email y contraseña.',
+    'auth/email-already-in-use':'Ya existe una cuenta con ese email. Usá "Entrar".',
+    'auth/invalid-email':'El email no tiene un formato válido.',
+    'auth/weak-password':'Contraseña muy débil (mínimo 6 caracteres).',
+    'auth/too-many-requests':'Demasiados intentos. Esperá unos minutos.',
+    'auth/network-request-failed':'Sin conexión a internet.',
+    'auth/popup-closed-by-user':'Cerraste la ventana de Google. Intentalo de nuevo.',
+    'auth/popup-blocked':'El popup fue bloqueado. Permitilo en tu navegador.',
+    'auth/operation-not-allowed':'Método de login no habilitado en Firebase Console.',
+    'auth/configuration-not-found':'Email/Password no habilitado — usá modo local o activalo en Firebase Console → Authentication.',
+    'auth/admin-restricted-operation':'Email/Password no habilitado — usá modo local o activalo en Firebase Console → Authentication.',
+    'auth/invalid-api-key':'API Key de Firebase inválida. Revisá la configuración en Ajustes.',
+    'auth/app-not-authorized':'App no autorizada en Firebase. Verificá authDomain.',
+  };
+  // Check if message text contains configuration-not-found (some SDK versions use message not code)
+  if((!code||!map[code]) && msg.includes('configuration-not-found')){
+    return 'Email/Password no habilitado — activalo en Firebase Console → Authentication → Sign-in method.';
+  }
+  return map[code] || ('Error: '+(msg.replace(/^Firebase: /,'').split('(')[0].trim()||code));
+}
+
+// Probe whether Firebase Auth Email/Password provider is enabled.
+// Uses a real signIn with obviously-wrong creds (valid email format so Firebase
+// must call the server, which reveals whether the provider is enabled).
+// Returns: true = provider enabled, false = configuration-not-found
+async function probeFirebaseAuth(){
+  if(!FB.ready||!FB.auth) return false;
+  if(FB.authOk===true) return true;   // already confirmed
+  if(FB.authOk===false) return false; // already confirmed not configured
+  try{
+    // This WILL fail — we just care about WHICH error it throws
+    await FB.auth.signInWithEmailAndPassword('probe_auth_test@familyfinance.app','probe_x_9z_invalid');
+    return true; // shouldn't reach here
+  }catch(e){
+    const code=e.code||'';
+    if(code==='auth/configuration-not-found'||code==='auth/admin-restricted-operation'){
+      FB.authOk=false;
+      return false;
+    }
+    // auth/user-not-found, auth/wrong-password, auth/invalid-credential, etc.
+    // all mean the provider IS enabled — the login just failed legitimately
+    FB.authOk=true;
+    return true;
+  }
+}
+
+// Call this whenever we detect auth/configuration-not-found to update UI
+function handleAuthNotConfigured(){
+  FB.authOk=false;
+  // Show amber warning in auth screen
+  const authStatus=document.getElementById('AUTH_fb_status');
+  if(authStatus){
+    authStatus.classList.remove('hidden');
+    authStatus.className='mb-3 flex items-center gap-2 text-xs px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 shadow-sm';
+    authStatus.innerHTML='<span class="fb-dot bg-amber-400"></span><span class="text-amber-700 dark:text-amber-400 font-semibold">⚠️ Firebase conectado — Email/Password no habilitado → usando modo local</span>';
+  }
+  // Show amber badge in Settings
+  const badge=document.getElementById('FB_status_badge');
+  if(badge){
+    badge.innerHTML='<span class="fb-dot bg-amber-400"></span> Auth no habilitado';
+    badge.className='badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 text-xs';
+  }
+  // Show instruction hint in Settings
+  const hint=document.getElementById('FB_hint');
+  if(hint){
+    hint.innerHTML='⚠️ Firestore conectado, pero Email/Password no está habilitado.<br>' +
+      '<strong>Para activarlo:</strong> Firebase Console → Authentication → Sign-in method → Email/Password → Activar.<br>' +
+      'Mientras tanto la app funciona en modo local (datos guardados en este dispositivo).';
+    hint.className='text-xs text-amber-600 dark:text-amber-400 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20';
+    hint.classList.remove('hidden');
+  }
+}
+
+function showErr(id,msg){
+  const el=document.getElementById(id);if(!el)return;
+  el.textContent=msg;el.classList.remove('hidden');
+  setTimeout(()=>el.classList.add('hidden'),6000);
+}
+
+async function loginSuccess(user){
+  localStorage.setItem('ff_lastuid',user.id);
+
+  // Load any existing local data first (fast, instant UI)
+  loadForUser(user.id);
+
+  // Merge firebase user properties into state
+  if(!S.user) S.user={...user};
+  else Object.assign(S.user,{id:user.id,name:user.name,email:user.email,
+    salary:user.salary||S.user.salary,
+    inflationRate:user.inflationRate||S.user.inflationRate,
+    familyId:user.familyId||S.user.familyId,
+    role:user.role||S.user.role});
+
+  // Show app immediately with local data
+  showScreen('app');
+  updateTopbar();
+  updateFBStatusUI(FB.ready);
+  checkAlerts();
+  populateSettingsForm();
+  nav('dashboard');
+
+  // Sync from Firestore in background, then refresh UI
+  if(FB.ready){
+    const familyId=S.user.familyId||user.familyId;
+    syncFromFirestore(user.id, familyId).then(()=>{
+      updateTopbar();
+      checkAlerts();
+      // Re-render whichever page the user is on
+      if(currentPage==='dashboard') renderDashboard();
+      else if(currentPage==='expenses') renderExpenses();
+      else if(currentPage==='cards') renderCards();
+      else if(currentPage==='budget') renderBudget();
+      else if(currentPage==='settings') renderSettings();
+    }).catch(e=>console.warn('Background sync error:',e));
+
+    subscribeExpenses(user.id);
+  }
+}
+
+function doLogout(){
+  if(FB.auth) FB.auth.signOut().catch(()=>{});
+  FB.unsubscribers.forEach(fn=>fn()); FB.unsubscribers=[];
+  FB.authOk=null; // reset auth probe for next login attempt
+  localStorage.removeItem('ff_lastuid');
+  S={user:null,family:null,members:[],expenses:[],cards:[],budgets:[],goals:[],alerts:[],month:new Date(),editExpId:null,editCardId:null};
+  _appStarted=false;
+  showScreen('auth'); authTab('login');
+  updateFBStatusUI(FB.ready); // refresh auth screen pill
+}
+
+// =============================================================
+// NAVIGATION
+// =============================================================
+const PAGES=['dashboard','expenses','cards','budget','advisor','settings'];
+
+function showScreen(name){
+  document.getElementById('SCR_LOADING').classList.toggle('hidden',name!=='loading');
+  document.getElementById('SCR_AUTH').classList.toggle('hidden',name!=='auth');
+  document.getElementById('SCR_APP').classList.toggle('hidden',name!=='app');
+}
+
+function nav(page){
+  currentPage=page;
+  PAGES.forEach(p=>{
+    document.getElementById('PG_'+p)?.classList.toggle('hidden',p!==page);
+    document.getElementById('NV_'+p)?.classList.toggle('active',p===page);
+  });
+  // Force layout flush so the new page is visible before render runs
+  void document.getElementById('PG_'+page)?.offsetHeight;
+  if(page==='dashboard') renderDashboard();
+  else if(page==='expenses') renderExpenses();
+  else if(page==='cards') renderCards();
+  else if(page==='budget') renderBudget();
+  else if(page==='settings') renderSettings();
+  // Ensure the rendered content is painted on GitHub Pages / WebView
+  requestAnimationFrame(()=>forceRepaint());
+}
+
+function renderCurrentPage(){nav(currentPage);}
+function prevMonth(){S.month=new Date(S.month.getFullYear(),S.month.getMonth()-1,1);if(currentPage==='dashboard')renderDashboard();}
+function nextMonth(){S.month=new Date(S.month.getFullYear(),S.month.getMonth()+1,1);if(currentPage==='dashboard')renderDashboard();}
+
+function updateTopbar(){
+  if(!S.user)return;
+  const n=S.user.name||'Usuario';
+  document.getElementById('TB_name').textContent=n;
+  document.getElementById('TB_avatar').textContent=n.charAt(0).toUpperCase();
+  document.getElementById('TB_family').querySelector('span:last-child').textContent=S.family?S.family.name:'Sin familia';
+  updateFBStatusUI(FB.ready);
+  const unread=(S.alerts||[]).filter(a=>!a.read).length;
+  const badge=document.getElementById('ALERT_BADGE');
+  if(unread>0){badge.textContent=unread;badge.classList.remove('hidden');badge.classList.add('flex');}
+  else{badge.classList.add('hidden');}
+}
+
+// =============================================================
+// SAMPLE DATA (only on first family creation)
+// =============================================================
+function loadSampleData(){
+  const now=new Date();
+  const yr=now.getFullYear();const mo=now.getMonth();
+  const d=(dy,m=0)=>new Date(yr,mo+m,dy).toISOString().split('T')[0];
+  S.expenses=[
+    {id:uid(),date:d(3),amount:75000,cat:'alquiler',desc:'Alquiler departamento',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(5),amount:18500,cat:'supermercado',desc:'Coto hipermercado',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(8),amount:14200,cat:'servicios',desc:'Luz + Gas + Internet',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(10),amount:12000,cat:'alimentos',desc:'Almacén barrio',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(12),amount:9800,cat:'transporte',desc:'SUBE + combustible',card:'',installments:3,curInst:1,hasInt:false,intRate:0},
+    {id:uid(),date:d(15),amount:8500,cat:'entretenimiento',desc:'Netflix + Prime + salida',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(18),amount:5200,cat:'salud',desc:'Farmacia + turno médico',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(20),amount:24000,cat:'educacion',desc:'Cuota colegio + libros',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(22),amount:35000,cat:'supermercado',desc:'Compra mensual grande',card:'',installments:6,curInst:2,hasInt:true,intRate:6.5},
+    {id:uid(),date:d(3,-1),amount:70000,cat:'alquiler',desc:'Alquiler mes anterior',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(10,-1),amount:16000,cat:'supermercado',desc:'Supermercado',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+    {id:uid(),date:d(15,-1),amount:11000,cat:'servicios',desc:'Servicios',card:'',installments:0,curInst:0,hasInt:false,intRate:0},
+  ];
+  S.cards=[
+    {id:uid(),name:'Visa Galicia',limit:400000,balance:120000,minPay:6000,intRate:8.5,due:d(15)},
+    {id:uid(),name:'Mastercard BBVA',limit:250000,balance:48000,minPay:2400,intRate:7.2,due:d(20)},
+  ];
+  // Link first card to some expenses
+  S.expenses[8].card=S.cards[0].id;
+  S.budgets=[
+    {id:uid(),cat:'alimentos',amount:60000,month:monthStr()},
+    {id:uid(),cat:'supermercado',amount:60000,month:monthStr()},
+    {id:uid(),cat:'entretenimiento',amount:15000,month:monthStr()},
+    {id:uid(),cat:'transporte',amount:15000,month:monthStr()},
+    {id:uid(),cat:'servicios',amount:20000,month:monthStr()},
+  ];
+  S.goals=[
+    {id:uid(),name:'Fondo de emergencia (6 meses)',target:600000,current:85000,date:d(1,12)},
+    {id:uid(),name:'Vacaciones 2025',target:300000,current:45000,date:d(1,10)},
+  ];
+}
+
+// =============================================================
+// ALERTS ENGINE
+// =============================================================
+function checkAlerts(){
+  const newAlerts=[];
+  const todayDate=today();
+  const mo=S.month;
+
+  // Card due soon (≤7 days) or overdue
+  (S.cards||[]).forEach(card=>{
+    if(!card.due)return;
+    const due=new Date(card.due+'T00:00:00');
+    const diff=Math.ceil((due-new Date())/(864e5));
+    if(diff>=0&&diff<=7)newAlerts.push({id:uid(),type:'due',msg:`💳 ${card.name} vence en ${diff}d`,read:false,date:todayDate,priority:1});
+    else if(diff<0)newAlerts.push({id:uid(),type:'due',msg:`🚨 ${card.name} venció hace ${Math.abs(diff)}d`,read:false,date:todayDate,priority:0});
+    // High utilization
+    const pct=(card.balance||0)/(card.limit||1)*100;
+    if(pct>85)newAlerts.push({id:uid(),type:'debt',msg:`⚠️ ${card.name} al ${Math.round(pct)}% del límite`,read:false,date:todayDate,priority:1});
+  });
+
+  // Budget exceeded
+  (S.budgets||[]).forEach(b=>{
+    if(b.month!==monthStr())return;
+    const spent=S.expenses.filter(e=>e.cat===b.cat&&sameMonth(e.date,mo)).reduce((s,e)=>s+(e.amount||0),0);
+    if(spent>b.amount){
+      const over=((spent-b.amount)/b.amount*100).toFixed(0);
+      newAlerts.push({id:uid(),type:'budget',msg:`🚨 ${catName(b.cat)}: superado ${over}% (${fmtARS(spent)})`,read:false,date:todayDate,priority:0});
+    }else if(spent>b.amount*0.8){
+      newAlerts.push({id:uid(),type:'budget',msg:`⚠️ ${catName(b.cat)}: 80% del presupuesto`,read:false,date:todayDate,priority:2});
+    }
+  });
+
+  // High debt-to-income ratio
+  const income=S.user?.salary||0;
+  const totalDebt=(S.cards||[]).reduce((s,c)=>s+(c.balance||0),0);
+  if(income>0&&totalDebt/income>3)newAlerts.push({id:uid(),type:'debt',msg:`📊 Deuda total supera 3x tu salario mensual`,read:false,date:todayDate,priority:1});
+
+  // Merge without duplicates (same msg today)
+  const existing=S.alerts||[];
+  newAlerts.forEach(a=>{if(!existing.find(e=>e.msg===a.msg&&e.date===a.date))existing.unshift(a);});
+  S.alerts=existing.sort((a,b)=>(a.priority||2)-(b.priority||2)).slice(0,60);
+  persist();
+  updateTopbar();
+}
+
+function showAlerts(){
+  document.getElementById('ALERTS_list').innerHTML=S.alerts.length?S.alerts.map(a=>`
+    <div class="flex items-start gap-2 p-3 rounded-xl ${a.read?'bg-gray-50 dark:bg-gray-800':'bg-orange-50 dark:bg-orange-900/20'}">
+      <div class="flex-1"><p class="text-sm font-semibold">${a.msg}</p><p class="text-xs text-gray-400 mt-0.5">${fmtDate(a.date)}</p></div>
+      ${!a.read?'<span class="w-2 h-2 rounded-full bg-orange-500 mt-1.5 flex-shrink-0"></span>':''}
+    </div>`).join(''):'<p class="text-gray-400 text-sm text-center py-4">Sin alertas 🎉</p>';
+  document.getElementById('M_alerts').classList.remove('hidden');
+}
+function markAlertsRead(){S.alerts.forEach(a=>a.read=true);persist();updateTopbar();closeModal('M_alerts');toast('✓ Todas leídas');}
+
+// =============================================================
+// DASHBOARD
+// =============================================================
+function renderDashboard(){
+  const mo=S.month;
+  document.getElementById('MONTH_LABEL').textContent=monthLabel(mo);
+
+  const monthExp=S.expenses.filter(e=>sameMonth(e.date,mo));
+  const income=S.user?.salary||0;
+  const expense=monthExp.reduce((s,e)=>s+(e.amount||0),0);
+  const balance=income-expense;
+  const savRate=income>0?Math.round(balance/income*100):0;
+  const totalDebt=(S.cards||[]).reduce((s,c)=>s+(c.balance||0),0);
+  // Monthly installments commitment
+  const instMonthly=S.expenses.filter(e=>e.installments>1&&e.curInst<e.installments).reduce((s,e)=>{
+    const amt=e.hasInt?e.amount*(1+(e.intRate||0)/100):e.amount;
+    return s+amt;
+  },0);
+
+  document.getElementById('D_income').textContent=fmtARS(income);
+  document.getElementById('D_expense').textContent=fmtARS(expense);
+  document.getElementById('D_balance').textContent=fmtARS(balance);
+  document.getElementById('D_debt').textContent=fmtARS(totalDebt);
+  document.getElementById('D_saverate').textContent=savRate+'%';
+  document.getElementById('D_installments').textContent=fmtARS(instMonthly);
+
+  // Progress bar
+  const pct=income>0?Math.min(Math.round(expense/income*100),100):0;
+  document.getElementById('D_ratio').textContent=pct+'%';
+  const bar=document.getElementById('D_progress');
+  bar.style.width=pct+'%';
+  bar.style.background=pct>90?'#ef4444':pct>70?'#f59e0b':'#10b981';
+  const hint=document.getElementById('D_progress_hint');
+  if(hint)hint.textContent=pct>90?'⚠️ Muy cerca del límite':pct>70?'Moderado — considerá reducir gastos':'✅ En buen estado';
+
+  // Alerts banner
+  const unread=(S.alerts||[]).filter(a=>!a.read);
+  const aBox=document.getElementById('D_alerts_box');
+  if(unread.length>0){
+    aBox.classList.remove('hidden');
+    document.getElementById('D_alert_count').textContent=unread.length;
+    document.getElementById('D_alert_list').innerHTML=unread.slice(0,3).map(a=>`<p>• ${a.msg}</p>`).join('');
+  }else{aBox.classList.add('hidden');}
+
+  // Category breakdown
+  const catTotals={};
+  monthExp.forEach(e=>{catTotals[e.cat]=(catTotals[e.cat]||0)+(e.amount||0);});
+  const sorted=Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('D_cats').innerHTML=sorted.length?sorted.map(([cat,amt])=>{
+    const p=expense>0?Math.round(amt/expense*100):0;
+    const budg=S.budgets.find(b=>b.cat===cat&&b.month===monthStr(mo));
+    const over=budg&&amt>budg.amount;
+    return `<div>
+      <div class="flex justify-between items-center mb-1">
+        <span class="text-xs font-semibold flex items-center gap-1">${catEmoji(cat)} ${catName(cat)}${over?'<span class="text-[10px] bg-red-100 text-red-600 px-1 rounded">⚠️ Excedido</span>':''}</span>
+        <span class="text-xs font-bold mono">${fmtARS(amt)} <span class="text-gray-400 font-normal">${p}%</span></span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${p}%;background:${catColor(cat)}"></div></div>
+    </div>`;
+  }).join(''):'<p class="text-gray-400 text-sm text-center py-2">Sin gastos este mes</p>';
+
+  // Recent
+  const recent=monthExp.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  document.getElementById('D_recent').innerHTML=recent.length?recent.map(e=>expRow(e,true)).join(''):'<p class="text-gray-400 text-sm text-center py-2">Sin gastos este mes</p>';
+
+  drawBalanceChart();
+}
+
+// Improved balance projection: accounts for installments, inflation, card min payments
+function drawBalanceChart(){
+  const labels=[];const balData=[];const expData=[];
+  const income=S.user?.salary||0;
+  const infl=(S.user?.inflationRate||5)/100;
+  let runningBalance=0;
+
+  for(let i=0;i<12;i++){
+    const d=new Date(S.month.getFullYear(),S.month.getMonth()+i,1);
+    labels.push(monShort(S.month,i));
+
+    // Real expenses for past/current months
+    const moExp=S.expenses.filter(e=>sameMonth(e.date,d)).reduce((s,e)=>s+(e.amount||0),0);
+    // Future: use average of last 3 months adjusted by inflation
+    const pastExp=i>0?0:moExp;
+    const projExp=i===0?moExp:Math.round(
+      S.expenses.filter(e=>{const ed=new Date(e.date);return ed<d;}).length?
+        (S.expenses.filter(e=>{const ed=new Date(e.date);const mo3=new Date(d.getFullYear(),d.getMonth()-3,1);return ed>=mo3&&ed<d;}).reduce((s,e)=>s+(e.amount||0),0)/3)*(1+infl):
+        moExp*(1+infl*i)
+    );
+    // Card minimums as fixed future cost
+    const cardMins=(S.cards||[]).reduce((s,c)=>s+(c.minPay||0),0);
+    const totalCost=i===0?moExp:projExp+cardMins;
+    const moBalance=Math.round(income*(1+infl*i*0.1)-totalCost);
+
+    runningBalance+=moBalance;
+    balData.push(Math.max(-income*3,moBalance));
+    expData.push(totalCost);
+  }
+
+  if(charts['C_balance'])charts['C_balance'].destroy();
+  const ctx=document.getElementById('C_balance');if(!ctx)return;
+  charts['C_balance']=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Balance mensual',data:balData,borderColor:'#e07b39',backgroundColor:'rgba(224,123,57,.12)',tension:.4,fill:true,pointRadius:3},
+      {label:'Gasto proyectado',data:expData,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',tension:.4,fill:false,pointRadius:2,borderDash:[4,3]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},color:tc()}}},
+      scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10},callback:v=>fmtARS(v)}}}}
+  });
+}
+
+// =============================================================
+// EXPENSES
+// =============================================================
+function expFilter(mode){
+  expFilterMode=mode;
+  ['all','month'].forEach(m=>{
+    const btn=document.getElementById('EF_'+m);
+    if(btn)btn.className='flex-shrink-0 btn btn-sm '+(m===mode?'btn-primary':'btn-ghost');
+  });
+  renderExpenses();
+}
+
+function renderExpenses(){
+  const q=(document.getElementById('EXP_search')||{}).value?.toLowerCase()||'';
+  let exps=[...S.expenses];
+  if(expFilterMode==='month')exps=exps.filter(e=>sameMonth(e.date,S.month));
+  if(q)exps=exps.filter(e=>(e.desc||'').toLowerCase().includes(q)||catName(e.cat).toLowerCase().includes(q));
+  exps.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById('EXP_list').innerHTML=exps.length?exps.map(e=>expRow(e,false)).join(''):`<div class="card text-center py-6 text-gray-400 text-sm">💸 ${t('noExpenses')}</div>`;
+}
+
+function expRow(e,compact){
+  const card=S.cards.find(c=>c.id===e.card);
+  const instBadge=e.installments>1?`<span class="badge bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">${e.curInst||1}/${e.installments}${e.hasInt?'🔴':''}</span>`:'';
+  const cardBadge=card?`<span class="badge bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">💳 ${card.name.split(' ')[0]}</span>`:'';
+  return `<div class="card flex items-center gap-3 p-3">
+    <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-xl flex-shrink-0" style="background:${catColor(e.cat)}1a">${catEmoji(e.cat)}</div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-1 flex-wrap"><p class="text-sm font-bold truncate">${e.desc||catName(e.cat)}</p>${instBadge}${cardBadge}</div>
+      <p class="text-xs text-gray-400 mt-0.5">${fmtDate(e.date)} · ${catName(e.cat)}</p>
+    </div>
+    <div class="text-right flex-shrink-0">
+      <p class="font-extrabold text-sm text-red-500">-${fmtARS(e.amount)}</p>
+      ${compact?'':
+        `<div class="flex gap-1 mt-1">
+          <button onclick="editExp('${e.id}')" class="text-[10px] px-2 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 font-semibold">✏️</button>
+          <button onclick="deleteExp('${e.id}')" class="text-[10px] px-2 py-0.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500 font-semibold">🗑</button>
+        </div>`}
+    </div>
+  </div>`;
+}
+
+function openExpModal(e){
+  S.editExpId=e?e.id:null;
+  document.getElementById('M_exp_title').textContent=e?'Editar Gasto':'Agregar Gasto';
+  document.getElementById('E_date').value=e?e.date:today();
+  document.getElementById('E_amount').value=e?e.amount:'';
+  document.getElementById('E_desc').value=e?e.desc:'';
+  document.getElementById('E_cat').innerHTML=CATS.map(c=>`<option value="${c.id}" ${e&&e.cat===c.id?'selected':''}>${c.e} ${LANG==='es'?c.es:c.en}</option>`).join('');
+  document.getElementById('E_card').innerHTML='<option value="">💵 Efectivo / Sin tarjeta</option>'+S.cards.map(c=>`<option value="${c.id}" ${e&&e.card===c.id?'selected':''}>${c.name}</option>`).join('');
+  const instSec=document.getElementById('INST_section');
+  instSec.classList.add('hidden');
+  document.getElementById('INST_arrow').textContent='+';
+  document.getElementById('E_total_inst').value=e&&e.installments>1?e.installments:'';
+  document.getElementById('E_has_int').checked=e?.hasInt||false;
+  document.getElementById('E_int_rate').value=e?.intRate||'';
+  document.getElementById('E_int_rate').classList.toggle('hidden',!e?.hasInt);
+  if(e&&e.installments>1){toggleInstSection();updateInstSel(e.curInst||1);}
+  const modal=document.getElementById('M_expense');
+  modal.classList.remove('hidden');
+  void modal.offsetHeight; // flush layout
+  forceRepaint(modal);
+}
+function editExp(id){const e=S.expenses.find(x=>x.id===id);if(e)openExpModal(e);}
+async function deleteExp(id){
+  if(!confirm('¿Eliminar este gasto?'))return;
+  S.expenses=S.expenses.filter(x=>x.id!==id);
+  persist();
+  if(FB.ready)await fbDelete('expenses',id);
+  scheduleRender(()=>{
+    renderExpenses();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+  toast(t('expDeleted'));
+}
+
+function toggleInstSection(){
+  const hidden=document.getElementById('INST_section').classList.toggle('hidden');
+  document.getElementById('INST_arrow').textContent=hidden?'+':'−';
+}
+function updateInstSel(cur){
+  const total=parseInt(document.getElementById('E_total_inst').value)||1;
+  document.getElementById('E_cur_inst').innerHTML=Array.from({length:total},(_,i)=>`<option value="${i+1}" ${i+1===(cur||1)?'selected':''}>${i+1}</option>`).join('');
+}
+function toggleIntRate(){document.getElementById('E_int_rate').classList.toggle('hidden',!document.getElementById('E_has_int').checked);}
+
+async function saveExpense(){
+  const date=document.getElementById('E_date').value;
+  const amount=parseFloat(document.getElementById('E_amount').value);
+  const cat=document.getElementById('E_cat').value;
+  const desc=document.getElementById('E_desc').value.trim();
+  const card=document.getElementById('E_card').value;
+  const instHidden=document.getElementById('INST_section').classList.contains('hidden');
+  const installments=instHidden?0:parseInt(document.getElementById('E_total_inst').value)||0;
+  const curInst=instHidden?0:parseInt(document.getElementById('E_cur_inst').value)||1;
+  const hasInt=!instHidden&&document.getElementById('E_has_int').checked;
+  const intRate=hasInt?parseFloat(document.getElementById('E_int_rate').value)||0:0;
+  if(!date||!amount||amount<=0){toast('⚠️ Completa fecha y monto');return;}
+  const exp={id:S.editExpId||uid(),date,amount,cat,desc,card,installments,curInst,hasInt,intRate,userId:S.user?.id};
+  if(S.editExpId)S.expenses=S.expenses.map(e=>e.id===S.editExpId?exp:e);
+  else S.expenses.unshift(exp);
+  persist();
+  if(FB.ready)await fbSet('expenses',exp.id,exp);
+  closeModal('M_expense');
+  scheduleRender(()=>{
+    renderExpenses();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+  toast(t('expAdded'));checkAlerts();updateTopbar();
+}
+
+// =============================================================
+// CARDS
+// =============================================================
+function renderCards(){
+  const list=document.getElementById('CARDS_list');
+  if(!S.cards.length){list.innerHTML=`<div class="card text-center py-6 text-gray-400 text-sm">💳 ${t('noCards')}</div>`;drawDebtChart();renderInstallments();return;}
+  list.innerHTML=S.cards.map(c=>{
+    const pct=c.limit>0?Math.min(Math.round(c.balance/c.limit*100),100):0;
+    const clr=pct>80?'#ef4444':pct>50?'#f59e0b':'#10b981';
+    const due=c.due?Math.ceil((new Date(c.due+'T00:00:00')-new Date())/864e5):null;
+    const annualRate=((Math.pow(1+(c.intRate||0)/100,12)-1)*100).toFixed(0);
+    return `<div class="card">
+      <div class="flex justify-between items-start mb-3">
+        <div><p class="font-extrabold">${c.name}</p>
+          <p class="text-xs text-gray-400 mt-0.5">${due!==null?`Vence en ${due}d · `:''}Min: ${fmtARS(c.minPay)}/mes · TNA ~${annualRate}%</p>
+        </div>
+        <div class="flex gap-1">
+          <button onclick="editCard('${c.id}')" class="text-xs px-2 py-1 rounded-lg bg-gray-100 dark:bg-gray-700">✏️</button>
+          <button onclick="deleteCard('${c.id}')" class="text-xs px-2 py-1 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500">🗑</button>
+        </div>
+      </div>
+      <div class="flex justify-between items-end mb-2">
+        <div><p class="text-xs text-gray-400">Deuda actual</p><p class="text-2xl font-extrabold" style="color:${clr}">${fmtARS(c.balance)}</p></div>
+        <div class="text-right"><p class="text-xs text-gray-400">Límite</p><p class="font-bold text-gray-400">${fmtARS(c.limit)}</p></div>
+      </div>
+      <div class="progress-wrap mb-1.5"><div class="progress-bar" style="width:${pct}%;background:${clr}"></div></div>
+      <div class="flex justify-between text-xs text-gray-400">
+        <span>${pct}% utilizado</span>
+        <span>Interés: ${c.intRate||0}% mensual</span>
+      </div>
+    </div>`;
+  }).join('');
+  drawDebtChart();renderInstallments();
+}
+
+function openCardModal(c){
+  S.editCardId=c?c.id:null;
+  document.getElementById('M_card_title').textContent=c?'Editar Tarjeta':'Nueva Tarjeta';
+  ['C_name','C_limit','C_balance','C_minpay','C_intrate','C_due'].forEach(id=>{
+    document.getElementById(id).value=c?c[{C_name:'name',C_limit:'limit',C_balance:'balance',C_minpay:'minPay',C_intrate:'intRate',C_due:'due'}[id]]||'':'';
+  });
+  const modal=document.getElementById('M_card');
+  modal.classList.remove('hidden');
+  void modal.offsetHeight;
+  forceRepaint(modal);
+}
+function editCard(id){openCardModal(S.cards.find(x=>x.id===id));}
+async function deleteCard(id){
+  if(!confirm('¿Eliminar esta tarjeta?'))return;
+  S.cards=S.cards.filter(x=>x.id!==id);
+  persist();
+  if(FB.ready)await fbDelete('cards',id);
+  scheduleRender(()=>{
+    renderCards();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+  toast(t('cardDeleted'));
+  checkAlerts();updateTopbar();
+}
+async function saveCard(){
+  const name=document.getElementById('C_name').value.trim();
+  if(!name){toast('⚠️ Ingresa un nombre');return;}
+  const card={id:S.editCardId||uid(),name,
+    limit:parseFloat(document.getElementById('C_limit').value)||0,
+    balance:parseFloat(document.getElementById('C_balance').value)||0,
+    minPay:parseFloat(document.getElementById('C_minpay').value)||0,
+    intRate:parseFloat(document.getElementById('C_intrate').value)||0,
+    due:document.getElementById('C_due').value,
+    userId:S.user?.id};
+  if(S.editCardId)S.cards=S.cards.map(c=>c.id===S.editCardId?card:c);
+  else S.cards.push(card);
+  persist();
+  if(FB.ready)await fbSet('cards',card.id,card);
+  closeModal('M_card');
+  scheduleRender(()=>{
+    renderCards();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+  toast(t('cardAdded'));checkAlerts();updateTopbar();
+}
+
+// Improved debt projection with compound interest
+function drawDebtChart(){
+  const labels=[];
+  const datasets=S.cards.map(c=>({
+    label:c.name,data:[],
+    borderColor:hslSeed(c.id),backgroundColor:hslSeed(c.id)+'22',
+    tension:.4,fill:false,pointRadius:3
+  }));
+  for(let i=0;i<12;i++){
+    labels.push(monShort(S.month,i));
+    S.cards.forEach((c,ci)=>{
+      let b=c.balance;
+      for(let j=0;j<i;j++){
+        const interest=c.intRate>0?b*(c.intRate/100):0;
+        const pay=Math.max(c.minPay||0,b*0.05);// at least 5% or min payment
+        b=Math.max(0,b+interest-pay);
+      }
+      datasets[ci].data.push(Math.round(b));
+    });
+  }
+  mkChartMulti('C_debt','line',labels,datasets);
+}
+
+function renderInstallments(){
+  const instExp=S.expenses.filter(e=>e.installments>1&&(e.curInst||1)<e.installments);
+  const el=document.getElementById('INST_list');
+  el.innerHTML=instExp.length?instExp.map(e=>{
+    const remaining=e.installments-(e.curInst||1);
+    const amt=e.hasInt?e.amount*(1+(e.intRate||0)/100):e.amount;
+    const total=amt*e.installments;
+    return `<div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
+      <span class="text-xl">${catEmoji(e.cat)}</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold truncate">${e.desc||catName(e.cat)}</p>
+        <p class="text-xs text-gray-400">Cuota ${e.curInst||1}/${e.installments} · ${remaining} restante(s) · Total: ${fmtARS(total)}</p>
+      </div>
+      <p class="text-sm font-extrabold text-orange-500 flex-shrink-0">${fmtARS(amt)}/mes</p>
+    </div>`;
+  }).join(''):'<p class="text-gray-400 text-sm text-center py-3">Sin cuotas activas 🎉</p>';
+}
+
+// =============================================================
+// BUDGET / GOALS
+// =============================================================
+function renderBudget(){
+  const mo=S.month;
+  const buds=S.budgets.filter(b=>b.month===monthStr(mo));
+  document.getElementById('BUD_list').innerHTML=buds.length?buds.map(b=>{
+    const spent=S.expenses.filter(e=>e.cat===b.cat&&sameMonth(e.date,mo)).reduce((s,e)=>s+(e.amount||0),0);
+    const pct=b.amount>0?Math.min(Math.round(spent/b.amount*100),100):0;
+    const clr=pct>=100?'#ef4444':pct>75?'#f59e0b':'#10b981';
+    const remain=Math.max(0,b.amount-spent);
+    return `<div class="card">
+      <div class="flex justify-between items-center mb-2">
+        <span class="font-bold text-sm">${catEmoji(b.cat)} ${catName(b.cat)}</span>
+        <div class="flex items-center gap-2">
+          <span class="mono text-sm font-bold" style="color:${clr}">${fmtARS(spent)}</span>
+          <span class="text-gray-400 text-xs">/ ${fmtARS(b.amount)}</span>
+          <button onclick="deleteBudget('${b.id}')" class="text-xs px-2 py-0.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500">🗑</button>
+        </div>
+      </div>
+      <div class="progress-wrap mb-1"><div class="progress-bar" style="width:${pct}%;background:${clr}"></div></div>
+      <p class="text-xs text-gray-400">${pct}% — Queda: <span class="font-semibold" style="color:${clr}">${fmtARS(remain)}</span></p>
+    </div>`;
+  }).join(''):`<div class="card text-center py-6 text-gray-400 text-sm">🎯 ${t('noBudgets')}</div>`;
+
+  document.getElementById('GOAL_list').innerHTML=S.goals.length?S.goals.map(g=>{
+    const pct=g.target>0?Math.min(Math.round(g.current/g.target*100),100):0;
+    const days=g.date?Math.ceil((new Date(g.date+'T00:00:00')-new Date())/864e5):null;
+    const needed=g.target-g.current;
+    const monthly=days&&days>0?Math.round(needed/(days/30)):0;
+    return `<div class="card">
+      <div class="flex justify-between items-start mb-2">
+        <div><p class="font-bold">🎯 ${g.name}</p><p class="text-xs text-gray-400 mt-0.5">${days?days>0?`${days}d restantes · Ahorrar ~${fmtARS(monthly)}/mes`:'⏰ Plazo vencido':'Sin fecha'}</p></div>
+        <div class="flex items-center gap-1">
+          <span class="badge bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">${pct}%</span>
+          <button onclick="deleteGoal('${g.id}')" class="text-xs px-2 py-0.5 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500">🗑</button>
+        </div>
+      </div>
+      <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+        <span>Actual: <span class="font-bold text-green-500">${fmtARS(g.current)}</span></span>
+        <span>Meta: <span class="font-bold">${fmtARS(g.target)}</span></span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar bg-green-400" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join(''):`<div class="card text-center py-6 text-gray-400 text-sm">💰 ${t('noGoals')}</div>`;
+
+  drawSavingsChart();drawInflationChart();
+}
+
+function openBudgetModal(){
+  document.getElementById('B_cat').innerHTML=CATS.map(c=>`<option value="${c.id}">${c.e} ${LANG==='es'?c.es:c.en}</option>`).join('');
+  document.getElementById('B_month').value=monthStr(S.month);
+  const m=document.getElementById('M_budget');
+  m.classList.remove('hidden');
+  void m.offsetHeight;
+  forceRepaint(m);
+}
+async function saveBudget(){
+  const cat=document.getElementById('B_cat').value;
+  const amount=parseFloat(document.getElementById('B_amount').value)||0;
+  const month=document.getElementById('B_month').value;
+  if(!amount){toast('⚠️ Ingresa un monto');return;}
+  const existing=S.budgets.findIndex(b=>b.cat===cat&&b.month===month);
+  const bud={id:existing>=0?S.budgets[existing].id:uid(),cat,amount,month,userId:S.user?.id};
+  if(existing>=0)S.budgets[existing]=bud;else S.budgets.push(bud);
+  persist();
+  if(FB.ready)await fbSet('budgets',bud.id,bud);
+  closeModal('M_budget');
+  scheduleRender(()=>{
+    renderBudget();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+  toast(t('budgetAdded'));checkAlerts();updateTopbar();
+}
+async function deleteBudget(id){
+  S.budgets=S.budgets.filter(x=>x.id!==id);
+  persist();
+  if(FB.ready)await fbDelete('budgets',id);
+  scheduleRender(()=>{
+    renderBudget();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+  checkAlerts();updateTopbar();
+}
+
+function openGoalModal(){
+  const m=document.getElementById('M_goal');
+  m.classList.remove('hidden');
+  void m.offsetHeight;
+  forceRepaint(m);
+}
+async function saveGoal(){
+  const name=document.getElementById('G_name').value.trim();
+  const target=parseFloat(document.getElementById('G_target').value)||0;
+  const current=parseFloat(document.getElementById('G_current').value)||0;
+  const date=document.getElementById('G_date').value;
+  if(!name||!target){toast('⚠️ Completa nombre y monto');return;}
+  const goal={id:uid(),name,target,current,date,userId:S.user?.id};
+  S.goals.push(goal);
+  persist();
+  if(FB.ready)await fbSet('goals',goal.id,goal);
+  closeModal('M_goal');
+  // Clear form fields for next use
+  ['G_name','G_target','G_current','G_date'].forEach(id=>{document.getElementById(id).value='';});
+  scheduleRender(()=>{
+    renderBudget();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+  toast(t('goalAdded'));
+}
+async function deleteGoal(id){
+  S.goals=S.goals.filter(x=>x.id!==id);
+  persist();
+  if(FB.ready)await fbDelete('goals',id);
+  scheduleRender(()=>{
+    renderBudget();
+    if(currentPage==='dashboard')renderDashboard();
+  });
+}
+
+// Savings chart with compound interest (plazo fijo ~6% monthly effective)
+function drawSavingsChart(){
+  const labels=[];const savData=[];const intData=[];
+  const income=S.user?.salary||0;
+  const infl=(S.user?.inflationRate||5)/100;
+  let cumSav=0;let cumInt=0;
+  const intRate=0.05;// approximate plazo fijo monthly rate
+  for(let i=0;i<12;i++){
+    const d=new Date(S.month.getFullYear(),S.month.getMonth()+i,1);
+    labels.push(monShort(S.month,i));
+    const realIncome=income*(1+infl*i*0.05);
+    const moExp=i===0?S.expenses.filter(e=>sameMonth(e.date,d)).reduce((s,e)=>s+(e.amount||0),0):realIncome*0.75;
+    const sav=Math.max(0,realIncome-moExp);
+    cumInt+=cumSav*intRate;
+    cumSav+=sav;
+    savData.push(Math.round(cumSav));
+    intData.push(Math.round(cumSav+cumInt));
+  }
+  mkChartMulti('C_savings','line',labels,[
+    {label:'Ahorro acumulado',data:savData,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.12)',tension:.4,fill:true,pointRadius:2},
+    {label:'Con interés (PF ~5%/mes)',data:intData,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.08)',tension:.4,fill:true,pointRadius:2}
+  ]);
+}
+
+function drawInflationChart(){
+  const labels=[];const nomData=[];const realData=[];const inflData=[];
+  const base=S.user?.salary||100000;
+  const infl=(S.user?.inflationRate||5)/100;
+  for(let i=0;i<12;i++){
+    labels.push(monShort(S.month,i));
+    nomData.push(Math.round(base));
+    realData.push(Math.round(base/Math.pow(1+infl,i)));
+    inflData.push(Math.round(base*Math.pow(1+infl,i)));// what you'd need to keep up
+  }
+  mkChartMulti('C_inflation','bar',labels,[
+    {label:'Sueldo nominal',data:nomData,backgroundColor:'rgba(224,123,57,.7)'},
+    {label:'Poder adquisitivo real',data:realData,backgroundColor:'rgba(16,185,129,.7)'},
+    {label:'Sueldo necesario p/ mantener nivel',data:inflData,backgroundColor:'rgba(239,68,68,.4)',borderColor:'#ef4444',borderWidth:1}
+  ]);
+}
+
+// =============================================================
+// ASESOR IA — Advanced financial analysis
+// =============================================================
+function runAdvisor(){
+  const mo=S.month;
+  const monthExp=S.expenses.filter(e=>sameMonth(e.date,mo));
+  const income=S.user?.salary||0;
+  const infl=(S.user?.inflationRate||5)/100;
+  const totalExp=monthExp.reduce((s,e)=>s+(e.amount||0),0);
+  const balance=income-totalExp;
+  const savRate=income>0?balance/income:0;
+  const totalDebt=(S.cards||[]).reduce((s,c)=>s+(c.balance||0),0);
+  const debtRatio=income>0?totalDebt/income:0;
+  const minPayTotal=(S.cards||[]).reduce((s,c)=>s+(c.minPay||0),0);
+  const minPayRatio=income>0?minPayTotal/income:0;
+  const instTotal=S.expenses.filter(e=>e.installments>1).reduce((s,e)=>s+(e.amount||0),0);
+  const instRatio=income>0?instTotal/income:0;
+
+  // Scoring model (0–100)
+  let score=100;
+  // Savings rate (weight: 30 pts)
+  if(savRate<0)score-=30;else if(savRate<0.05)score-=20;else if(savRate<0.1)score-=12;else if(savRate<0.2)score-=5;
+  // Debt ratio (weight: 25 pts)
+  if(debtRatio>5)score-=25;else if(debtRatio>3)score-=18;else if(debtRatio>2)score-=10;else if(debtRatio>1)score-=5;
+  // Min payment burden (weight: 20 pts)
+  if(minPayRatio>0.35)score-=20;else if(minPayRatio>0.25)score-=12;else if(minPayRatio>0.15)score-=6;
+  // Inflation impact (weight: 15 pts)
+  if(infl>0.1)score-=15;else if(infl>0.07)score-=10;else if(infl>0.05)score-=5;
+  // Budget adherence (weight: 10 pts)
+  const overBudgets=S.budgets.filter(b=>{
+    const spent=S.expenses.filter(e=>e.cat===b.cat&&sameMonth(e.date,mo)).reduce((s,e)=>s+(e.amount||0),0);
+    return spent>b.amount;
+  }).length;
+  score-=overBudgets*5;
+  score=Math.max(0,Math.min(100,Math.round(score)));
+
+  // Update UI
+  document.getElementById('ADV_score').textContent=score;
+  const labels={90:{t:'🌟 Excelente',c:'#10b981'},75:{t:'😊 Muy bien',c:'#22c55e'},60:{t:'🙂 Bien',c:'#f59e0b'},45:{t:'😐 Regular',c:'#f97316'},0:{t:'😰 Situación crítica',c:'#ef4444'}};
+  const lbl=Object.entries(labels).sort((a,b)=>b[0]-a[0]).find(([k])=>score>=k);
+  document.getElementById('ADV_label').textContent=lbl?lbl[1].t:'—';
+  document.getElementById('ADV_ring').style.strokeDashoffset=226*(1-score/100);
+  document.getElementById('ADV_stats').classList.remove('hidden');
+  document.getElementById('ADV_saverate').textContent=Math.round(savRate*100)+'%';
+  document.getElementById('ADV_saverate').style.color=savRate>=0.2?'#10b981':savRate>=0.1?'#f59e0b':'#ef4444';
+  document.getElementById('ADV_debtratio').textContent=Math.round(debtRatio*100)+'%';
+  document.getElementById('ADV_debtratio').style.color=debtRatio<1?'#10b981':debtRatio<2?'#f59e0b':'#ef4444';
+  document.getElementById('ADV_instratio').textContent=Math.round(instRatio*100)+'%';
+  document.getElementById('ADV_instratio').style.color=instRatio<0.1?'#10b981':instRatio<0.2?'#f59e0b':'#ef4444';
+
+  const recs=[];
+
+  // 1. Balance / Ahorro
+  if(balance<0){
+    recs.push({icon:'🚨',title:'Déficit mensual',color:'#ef4444',priority:0,
+      text:`Gastás ${fmtARS(Math.abs(balance))} más de lo que ingresás. Esto es insostenible. Revisá urgente: alquiler, supermercado y entretenimiento representan el mayor gasto. Establecé un presupuesto estricto ahora.`});
+  }else if(savRate<0.1){
+    recs.push({icon:'⚠️',title:`Ahorro muy bajo (${Math.round(savRate*100)}%)`,color:'#f59e0b',priority:1,
+      text:`Ahorrás menos del 10% de tus ingresos. El objetivo mínimo recomendado es 20%. Identificá los 3 gastos más fáciles de reducir y automatizá una transferencia de ahorro el día que cobra el sueldo.`});
+  }else if(savRate>=0.2){
+    recs.push({icon:'✅',title:`Excelente tasa de ahorro (${Math.round(savRate*100)}%)`,color:'#10b981',priority:3,
+      text:`Ahorrás el ${Math.round(savRate*100)}% de tus ingresos. ¡Muy bien! Con ${fmtARS(balance)} mensuales podés acelerar tus metas. Considerá invertir el excedente para que no pierda valor frente a la inflación.`});
+  }
+
+  // 2. Deuda con análisis de tarjeta más costosa
+  if(debtRatio>2){
+    const worst=S.cards.length?S.cards.reduce((w,c)=>c.intRate>w.intRate?c:w,S.cards[0]):null;
+    const annualRate=worst?((Math.pow(1+(worst.intRate||0)/100,12)-1)*100).toFixed(0):0;
+    recs.push({icon:'🚨',title:'Deuda alta — Usa método avalancha',color:'#ef4444',priority:0,
+      text:`Tu deuda total (${fmtARS(totalDebt)}) es ${Math.round(debtRatio*100)}% de tu ingreso mensual. ${worst?`Prioridad: ${worst.name} con ${worst.intRate}% mensual (~${annualRate}% anual). Pagá el máximo posible en esta y solo el mínimo en las demás.`:''} Evitá nuevas cuotas hasta reducir la deuda al 100% del ingreso mensual.`});
+  }else if(debtRatio>1){
+    recs.push({icon:'⚠️',title:'Deuda moderada',color:'#f59e0b',priority:2,
+      text:`Tu deuda (${fmtARS(totalDebt)}) supera tu sueldo mensual. Intentá pagar ${fmtARS(Math.round(totalDebt*0.15))} extra por mes para liquidarla en 12 meses. Pausá compras en cuotas.`});
+  }
+
+  // 3. Cuotas
+  const activaInst=S.expenses.filter(e=>e.installments>1&&(e.curInst||1)<e.installments);
+  if(activaInst.length>4){
+    const totalRemainder=activaInst.reduce((s,e)=>s+(e.amount*(e.installments-(e.curInst||1))),0);
+    recs.push({icon:'📦',title:`${activaInst.length} cuotas activas — comprometés el futuro`,color:'#f59e0b',priority:1,
+      text:`Tenés ${activaInst.length} compras en cuotas que comprometen aproximadamente ${fmtARS(totalRemainder)} de ingresos futuros. El límite saludable es 2–3 cuotas simultáneas. Antes de una nueva compra en cuotas, esperá a liquidar alguna activa.`});
+  }
+
+  // 4. Inflación
+  const realSalaryLoss=(Math.pow(1+infl,12)-1)*100;
+  recs.push({icon:'📈',title:`Inflación estimada: ${Math.round(infl*100)}% mensual`,color:'#8b5cf6',priority:2,
+    text:`Con ${Math.round(infl*100)}% mensual tu sueldo pierde ~${realSalaryLoss.toFixed(0)}% de poder adquisitivo en 12 meses. Para mantener el nivel de vida necesitarías ${fmtARS(Math.round(income*Math.pow(1+infl,12)))} en un año. Negociá aumentos periódicos o buscá ingresos adicionales.`});
+
+  // 5. Inversiones AR (with approximate current rates context)
+  if(savRate>0.05&&balance>0){
+    const fciMonthly=infl*100*(0.9).toFixed(1);
+    const pfMonthly=(infl*100*0.85).toFixed(1);
+    recs.push({icon:'💰',title:'Opciones de inversión para Argentina',color:'#6366f1',priority:3,
+      text:`Con ${fmtARS(balance)}/mes disponibles:\n• Fondo Money Market (FCI): liquidez inmediata, rinde ~${fciMonthly}% mensual aprox.\n• Plazo Fijo tradicional: ~${pfMonthly}% mensual (bloqueado 30d). Consultá TNA actual en tu banco.\n• Plazo Fijo UVA: te cubre contra inflación (ajusta por CER).\n• Dólar MEP: cobertura cambiaria, comprá en cuotas.\n• Cedears: acciones extranjeras en ARS, diversificación ante riesgo local.\nConsultá tasas actualizadas en BYMA o tu broker.`});
+  }
+
+  // 6. Budget adherence
+  if(overBudgets>0){
+    const cats=S.budgets.filter(b=>{
+      const sp=S.expenses.filter(e=>e.cat===b.cat&&sameMonth(e.date,mo)).reduce((s,e)=>s+(e.amount||0),0);
+      return sp>b.amount;
+    }).map(b=>catName(b.cat));
+    recs.push({icon:'📊',title:`Presupuesto excedido en ${overBudgets} categoría(s)`,color:'#ef4444',priority:1,
+      text:`Superaste el presupuesto en: ${cats.join(', ')}. Revisá si es un gasto puntual o un patrón. Si es recurrente, actualizá el presupuesto con un monto más realista o reducí el consumo.`});
+  }
+
+  // 7. Emergency fund check
+  const totalMonthlyExp=totalExp||income*0.8;
+  const efTarget=totalMonthlyExp*6;
+  const efGoal=S.goals.find(g=>g.name.toLowerCase().includes('emergencia')||g.name.toLowerCase().includes('emergency'));
+  if(!efGoal){
+    recs.push({icon:'🛡️',title:'Sin fondo de emergencia detectado',color:'#14b8a6',priority:2,
+      text:`Un fondo de emergencia de 3–6 meses de gastos (${fmtARS(efTarget)}) es la base de cualquier plan financiero. Creá una meta en la sección Metas y transferí una parte fija cada mes. Este fondo debe estar en un instrumento líquido (Money Market o caja de ahorro remunerada).`});
+  }
+
+  // Sort by priority and render
+  recs.sort((a,b)=>a.priority-b.priority);
+  document.getElementById('ADV_results').innerHTML=recs.map(r=>`
+    <div class="card border-l-4" style="border-color:${r.color}">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-2xl">${r.icon}</span>
+        <p class="font-extrabold text-sm leading-tight">${r.title}</p>
+      </div>
+      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-line">${r.text}</p>
+    </div>`).join('');
+}
+
+// =============================================================
+// SETTINGS
+// =============================================================
+function renderSettings(){
+  populateSettingsForm();
+  // Always sync Firebase UI state (shows/hides fields correctly)
+  updateFBStatusUI(FB.ready);
+  // Pre-fill saved config into fields (even if hidden, so they're ready if disconnected)
+  const cfg=LG('fb_config',{});
+  if(cfg.apiKey){
+    document.getElementById('FB_key').value=cfg.apiKey||'';
+    document.getElementById('FB_pid').value=cfg.projectId||'';
+    document.getElementById('FB_auth').value=cfg.authDomain||'';
+    document.getElementById('FB_bucket').value=cfg.storageBucket||'';
+  }
+  // Family info
+  const fi=document.getElementById('FAM_info');
+  fi.innerHTML=S.family?`<div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-800">
+    <p class="font-bold">${S.family.name}</p>
+    <p class="text-xs text-gray-400 mono mt-0.5">Código: ${S.family.code}</p>
+  </div>`:'<p class="text-gray-400">Sin familia creada</p>';
+  document.getElementById('FAM_members').innerHTML=(S.members||[]).map(m=>`
+    <div class="flex items-center gap-2 p-2 rounded-xl bg-gray-50 dark:bg-gray-800">
+      <div class="w-8 h-8 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0" style="background:#e07b39">${(m.name||'?').charAt(0)}</div>
+      <div class="flex-1 min-w-0"><p class="font-semibold text-sm">${m.name}</p><p class="text-xs text-gray-400">${fmtARS(m.salary||0)}/mes · ${m.role==='admin'?'Administrador':'Miembro'}</p></div>
+    </div>`).join('');
+  document.getElementById('RPT_month').value=monthStr();
+  renderReportStats();drawPieChart();
+}
+
+function populateSettingsForm(){
+  if(!S.user)return;
+  document.getElementById('S_name').value=S.user.name||'';
+  document.getElementById('S_salary').value=S.user.salary||'';
+  document.getElementById('S_inflation').value=S.user.inflationRate||5;
+}
+
+async function saveProfile(){
+  if(!S.user)return;
+  S.user.name=document.getElementById('S_name').value.trim()||S.user.name;
+  S.user.salary=parseFloat(document.getElementById('S_salary').value)||S.user.salary||0;
+  S.user.inflationRate=parseFloat(document.getElementById('S_inflation').value)||5;
+  persist();
+  if(FB.ready)await fbSet('users',S.user.id,S.user);
+  updateTopbar();toast(t('profileSaved'));
+}
+
+function copyCode(){
+  const code=S.family?.code||'Sin familia';
+  const txt=`Te invito a FamilyFinance. Usa el código: ${code}`;
+  navigator.clipboard?.writeText(txt).then(()=>toast(t('codeCopied'))).catch(()=>toast('Código: '+code));
+}
+
+async function saveFBConfig(){
+  const cfg={
+    apiKey:       document.getElementById('FB_key').value.trim(),
+    projectId:    document.getElementById('FB_pid').value.trim(),
+    authDomain:   document.getElementById('FB_auth').value.trim(),
+    storageBucket:document.getElementById('FB_bucket').value.trim()
+  };
+  if(!cfg.apiKey||!cfg.projectId||!cfg.authDomain){
+    toast('⚠️ apiKey, projectId y authDomain son obligatorios');return;
+  }
+  if(!cfg.apiKey.startsWith('AIza')){
+    toast('⚠️ apiKey inválida — debe comenzar con "AIza"');return;
+  }
+
+  LS('fb_config',cfg);
+  // Reset auth state for fresh probe with new config
+  FB.authOk=null;
+  toast('⏳ Conectando Firebase...', 2000);
+
+  const ok=await initFirebase(cfg);
+  if(!ok){
+    toast('❌ Error al conectar Firebase. Revisá apiKey, projectId y authDomain.',5000);
+    renderSettings();
+    return;
+  }
+
+  // Firebase SDK connected — now probe Auth
+  toast('🔥 Firebase conectado — verificando Auth...', 2000);
+  const authOk=await probeFirebaseAuth();
+
+  if(authOk){
+    toast('✅ Firebase + Auth verificados correctamente', 3500);
+  }else{
+    // Firestore connected but Auth provider not enabled
+    handleAuthNotConfigured();
+    toast('⚠️ Firestore OK — habilitá Email/Password en Firebase Console → Auth', 6000);
+  }
+
+  // Sync if user is logged in
+  if(S.user){
+    await syncFromFirestore(S.user.id,S.user.familyId);
+    subscribeExpenses(S.user.id);
+    if(currentPage==='dashboard') renderDashboard();
+  }else if(FB.auth){
+    try{
+      const fbUser=FB.auth.currentUser;
+      if(fbUser){
+        const profile=await fbGet('users',fbUser.uid)||{};
+        const user={id:fbUser.uid,
+          name:profile.name||fbUser.displayName||fbUser.email.split('@')[0],
+          email:fbUser.email,salary:profile.salary||0,
+          inflationRate:profile.inflationRate||5,
+          familyId:profile.familyId||null,role:profile.role||'member'};
+        _appStarted=false;
+        await loginSuccess(user);
+        toast('✅ Sesión restaurada desde Firebase',3000);
+      }
+    }catch(e){console.warn('Post-connect session check:',e);}
+  }
+
+  renderSettings();
+}
+
+function clearFBConfig(){
+  LS('fb_config',{});
+  FB.unsubscribers.forEach(fn=>fn());
+  FB={app:null,auth:null,db:null,ready:false,authOk:null,unsubscribers:[]};
+  _fbScriptsLoaded=false; _fbScriptsPromise=null;
+  updateFBStatusUI(false);
+  toast('🔌 Firebase desconectado');
+  renderSettings();
+}
+
+function clearData(){
+  if(!confirm('¿Borrar TODOS los datos locales? No se puede deshacer.'))return;
+  const id=S.user?.id;
+  if(id)['u_','exp_','card_','bud_','goal_','alert_','fam_','mem_'].forEach(p=>localStorage.removeItem('ff_'+p+id));
+  toast('🗑 Datos borrados');doLogout();
+}
+
+// Report stats
+function renderReportStats(){
+  const month=document.getElementById('RPT_month')?.value||monthStr();
+  const [yr,mo_]=month.split('-').map(Number);
+  const d=new Date(yr,mo_-1,1);
+  const exps=S.expenses.filter(e=>sameMonth(e.date,d));
+  const total=exps.reduce((s,e)=>s+(e.amount||0),0);
+  const income=S.user?.salary||0;
+  const bycat={};exps.forEach(e=>{bycat[e.cat]=(bycat[e.cat]||0)+(e.amount||0);});
+  document.getElementById('RPT_stats').innerHTML=`
+    <div class="flex justify-between p-2 rounded-xl bg-gray-50 dark:bg-gray-800"><span class="font-semibold">Ingresos</span><span class="font-extrabold text-green-500">${fmtFull(income)}</span></div>
+    <div class="flex justify-between p-2 rounded-xl bg-gray-50 dark:bg-gray-800"><span class="font-semibold">Gastos totales</span><span class="font-extrabold text-red-500">${fmtFull(total)}</span></div>
+    <div class="flex justify-between p-2 rounded-xl bg-gray-50 dark:bg-gray-800"><span class="font-semibold">Balance</span><span class="font-extrabold ${income-total>=0?'text-green-500':'text-red-500'}">${fmtFull(income-total)}</span></div>
+    ${Object.entries(bycat).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([cat,amt])=>`
+    <div class="flex justify-between p-2 rounded-xl bg-gray-50 dark:bg-gray-800">
+      <span>${catEmoji(cat)} ${catName(cat)}</span><span class="font-bold">${fmtFull(amt)}</span>
+    </div>`).join('')}`;
+}
+function drawPieChart(){
+  const month=document.getElementById('RPT_month')?.value||monthStr();
+  const [yr,mo_]=month.split('-').map(Number);
+  const d=new Date(yr,mo_-1,1);
+  const bycat={};S.expenses.filter(e=>sameMonth(e.date,d)).forEach(e=>{bycat[e.cat]=(bycat[e.cat]||0)+(e.amount||0);});
+  if(!Object.keys(bycat).length)return;
+  if(charts['C_pie'])charts['C_pie'].destroy();
+  const ctx=document.getElementById('C_pie');if(!ctx)return;
+  charts['C_pie']=new Chart(ctx,{type:'doughnut',data:{
+    labels:Object.keys(bycat).map(k=>catName(k)),
+    datasets:[{data:Object.values(bycat),backgroundColor:Object.keys(bycat).map(k=>catColor(k)),borderWidth:2,borderColor:isDark()?'#1e2130':'#fff'}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10},color:tc()}}}}});
+}
+
+// =============================================================
+// IMPORT CSV
+// =============================================================
+function openImport(){document.getElementById('M_import').classList.remove('hidden');}
+function previewImport(ev){
+  const file=ev.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const lines=e.target.result.split('\n').map(l=>l.trim()).filter(Boolean);
+    importBuf=[];
+    lines.forEach((line,i)=>{
+      if(i===0&&/fecha|date|monto/i.test(line))return;// skip header
+      const parts=line.split(/[,;]/);
+      if(parts.length<2)return;
+      const date=parts[0]?.trim();
+      const amount=parseFloat((parts[1]?.trim()||'').replace(/[$\.]/g,'').replace(',','.'));
+      const cat=matchCat(parts[2]?.trim()||'otros');
+      const desc=(parts[3]?.trim()||'').replace(/^"|"$/g,'');
+      if(date&&amount>0)importBuf.push({id:uid(),date,amount,cat,desc,card:'',installments:0,curInst:0,hasInt:false,intRate:0,userId:S.user?.id});
+    });
+    document.getElementById('IMP_count').textContent=importBuf.length;
+    document.getElementById('IMP_list').innerHTML=importBuf.slice(0,8).map(e=>
+      `<div class="text-xs p-2 rounded-lg bg-gray-50 dark:bg-gray-800">${fmtDate(e.date)} · ${fmtARS(e.amount)} · ${catEmoji(e.cat)} ${catName(e.cat)} ${e.desc?'· '+e.desc:''}</div>`
+    ).join('')+(importBuf.length>8?`<p class="text-xs text-gray-400 mt-1">...y ${importBuf.length-8} más</p>`:'');
+    document.getElementById('IMP_preview').classList.remove('hidden');
+  };
+  r.readAsText(file,'utf-8');
+}
+function matchCat(str){
+  const s=normalize(str);
+  const map={alimentos:'alimentos',comida:'alimentos',food:'alimentos',transporte:'transporte',transport:'transporte',nafta:'transporte',uber:'transporte',taxi:'transporte',servicio:'servicios',service:'servicios',luz:'servicios',gas:'servicios',agua:'servicios',internet:'servicios',salud:'salud',health:'salud',medico:'salud',farmacia:'salud',educacion:'educacion',education:'educacion',colegio:'educacion',universidad:'educacion',entrete:'entretenimiento',netflix:'entretenimiento',cinema:'entretenimiento',cine:'entretenimiento',super:'supermercado',market:'supermercado',coto:'supermercado',dia:'supermercado',jumbo:'supermercado',carrefour:'supermercado',alquiler:'alquiler',rent:'alquiler',expensa:'alquiler',impuesto:'impuestos',tax:'impuestos',afip:'impuestos',arba:'impuestos'};
+  for(const [k,v] of Object.entries(map)){if(s.includes(k))return v;}
+  return 'otros';
+}
+const normalize=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+async function doImport(){
+  if(!importBuf.length){toast('⚠️ Sin datos para importar');return;}
+  S.expenses=[...S.expenses,...importBuf];
+  persist();
+  if(FB.ready)for(const e of importBuf)await fbSet('expenses',e.id,e);
+  closeModal('M_import');renderExpenses();if(currentPage==='dashboard')renderDashboard();
+  toast(`✅ ${importBuf.length} gastos importados`);importBuf=[];checkAlerts();
+}
+
+// =============================================================
+// PDF ANALYZER — Enhanced for Argentine bank statements
+// =============================================================
+function openPDFAnalyzer(){
+  const sel=document.getElementById('PDF_card');
+  sel.innerHTML='<option value="">Sin asignar tarjeta</option>'+S.cards.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('PDF_results').classList.add('hidden');
+  document.getElementById('PDF_loading').classList.add('hidden');
+  document.getElementById('PDF_err').classList.add('hidden');
+  document.getElementById('PDF_file').value='';
+  document.getElementById('M_pdf').classList.remove('hidden');
+}
+
+async function analyzePDF(ev){
+  const file=ev.target.files[0];if(!file)return;
+  const loading=document.getElementById('PDF_loading');
+  const results=document.getElementById('PDF_results');
+  const errEl=document.getElementById('PDF_err');
+  loading.classList.remove('hidden');results.classList.add('hidden');errEl.classList.add('hidden');
+
+  try{
+    if(typeof pdfjsLib==='undefined')throw new Error('pdf.js no cargó. Verificá tu conexión.');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    setLoadMsg('Cargando PDF...');
+    const ab=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    setLoadMsg(`Extrayendo ${pdf.numPages} página(s)...`);
+
+    // Extract text preserving structure
+    let pages=[];
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const content=await page.getTextContent();
+      // Group items by Y position to reconstruct lines
+      const byY={};
+      content.items.forEach(item=>{
+        const y=Math.round(item.transform[5]);
+        if(!byY[y])byY[y]=[];
+        byY[y].push({x:Math.round(item.transform[4]),str:item.str});
+      });
+      const lines=Object.entries(byY)
+        .sort((a,b)=>b[0]-a[0])
+        .map(([,items])=>items.sort((a,b)=>a.x-b.x).map(i=>i.str).join(' '));
+      pages.push(lines.join('\n'));
+    }
+    const fullText=pages.join('\n');
+
+    setLoadMsg('Analizando movimientos...');
+    const detected=parseArgentineStatement(fullText);
+    loading.classList.add('hidden');
+
+    if(!detected.length){
+      errEl.textContent='No se detectaron movimientos. El PDF podría estar escaneado (imagen) o tener un formato no reconocido.';
+      errEl.classList.remove('hidden');return;
+    }
+
+    // Summary
+    const total=detected.reduce((s,e)=>s+e.amount,0);
+    const inst=detected.filter(e=>e.installments>1).length;
+    document.getElementById('PDF_summary').innerHTML=`
+      <p class="font-bold">✅ ${detected.length} movimiento(s) detectado(s)</p>
+      <p>Total: ${fmtFull(total)} · En cuotas: ${inst} · 1 pago: ${detected.length-inst}</p>`;
+    document.getElementById('PDF_det_count').textContent=detected.length;
+
+    const pdfList=document.getElementById('PDF_list');
+    pdfList.innerHTML=detected.map((e,i)=>`
+      <label class="flex items-start gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 cursor-pointer">
+        <input type="checkbox" class="pdf-chk mt-0.5 w-4 h-4 rounded flex-shrink-0" data-idx="${i}" checked/>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold truncate">${e.desc}</p>
+          <p class="text-xs text-gray-400">${e.date?fmtDate(e.date):''} · ${catEmoji(e.cat)} ${catName(e.cat)}${e.installments>1?` · 📦 Cuota ${e.curInst}/${e.installments}`:' · 1 pago'}</p>
+        </div>
+        <p class="font-extrabold text-sm text-red-500 flex-shrink-0">${fmtARS(e.amount)}</p>
+      </label>`).join('');
+
+    window._pdfDetected=detected;
+    results.classList.remove('hidden');
+  }catch(err){
+    loading.classList.add('hidden');
+    errEl.textContent='❌ Error: '+err.message;
+    errEl.classList.remove('hidden');
+  }
+}
+function setLoadMsg(m){const el=document.getElementById('PDF_load_msg');if(el)el.textContent=m;}
+
+// Enhanced Argentine bank statement parser
+function parseArgentineStatement(text){
+  const results=[];
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l.length>3);
+
+  // --- Patterns for Argentine cards ---
+  // Date formats: DD/MM/YY, DD/MM/YYYY, DD-MM-YYYY
+  const dateRe=/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/;
+  // Amount: $1.234,56 | 1234,56 | 1.234,56 | 1234.56
+  const amountRe=/(?:\$\s?)?(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\b/g;
+  // Installment patterns: "12/24", "CTA 3/12", "CUOTA 03/12"
+  const instRe=/(?:C(?:UOT)?A?[:\s]?|CTA\s?)(\d{1,2})[\/\-](\d{1,2})/i;
+  // 1-pago pattern
+  const onePagoRe=/1\s?(?:PAGO|PAG|cuota)/i;
+
+  // Skip header/footer lines (common in AR statements)
+  const skipWords=['total','saldo','anterior','pago','minimo','minimo','vencimiento','resumen','fecha','comercio','importe','estado','cuenta','tarjeta','subtotal','debe','haber','acred','debito'];
+  const isSkip=line=>{const l=normalize(line);return skipWords.some(w=>l.startsWith(w))||l.length<8;};
+
+  lines.forEach(line=>{
+    if(isSkip(line))return;
+
+    const dateMatch=line.match(dateRe);
+    if(!dateMatch)return;
+
+    // Parse date
+    let [,dd,mm,yy]=dateMatch;
+    yy=yy.length===2?'20'+yy:yy;
+    dd=dd.padStart(2,'0');mm=mm.padStart(2,'0');
+    if(parseInt(mm)>12)return;// swap if DD/MM mixed up
+    const date=`${yy}-${mm}-${dd}`;
+    if(isNaN(new Date(date).getTime()))return;
+
+    // Find all numbers in line, take the largest reasonable one as amount
+    const nums=[];let m2;
+    const reCopy=new RegExp(amountRe.source,'g');
+    while((m2=reCopy.exec(line))!==null){
+      const raw=m2[1].replace(/\./g,'').replace(',','.');
+      const n=parseFloat(raw);
+      if(n>=100&&n<100000000)nums.push(n);
+    }
+    if(!nums.length)return;
+    const amount=Math.max(...nums);
+
+    // Installments
+    let installments=1,curInst=1;
+    const im=line.match(instRe);
+    if(im){curInst=parseInt(im[1]);installments=parseInt(im[2]);if(installments<curInst)installments=curInst;}
+    else if(onePagoRe.test(line)){installments=1;curInst=1;}
+
+    // Description: strip date, amounts and codes, keep merchant name
+    let desc=line
+      .replace(dateRe,'')
+      .replace(instRe,'')
+      .replace(/(?:\$\s?)?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?/g,'')
+      .replace(/\b\d{4,}\b/g,'')// remove codes
+      .replace(/\s{2,}/g,' ')
+      .trim();
+    // Take meaningful part (up to 45 chars)
+    desc=desc.split(/\s{3,}/)[0].trim().substring(0,45)||'Gasto detectado';
+    if(desc.length<3)desc='Gasto detectado';
+
+    // Check for duplicates (same amount + date)
+    if(results.find(r=>r.amount===amount&&r.date===date&&r.desc.substring(0,10)===desc.substring(0,10)))return;
+
+    results.push({
+      id:uid(),date,amount,cat:guessCategory(desc),desc,card:'',
+      installments,curInst,hasInt:installments>1,intRate:0,userId:S.user?.id
+    });
+  });
+
+  return results.slice(0,80);
+}
+
+// Enhanced category guesser with AR merchants
+function guessCategory(desc){
+  const d=normalize(desc);
+  if(/carrefour|coto|jumbo|disco|vea|dia|walmart|makro|mayorista/.test(d))return 'supermercado';
+  if(/farmacia|drogueria|hospital|clinica|medico|salud|sanatorio|osde|swiss|galeno/.test(d))return 'salud';
+  if(/netflix|spotify|hbo|disney|amazon|prime|cine|teatro|show|juego|gaming|steam/.test(d))return 'entretenimiento';
+  if(/ypf|shell|axion|puma|nafta|gnc|uber|cabify|rappi|sube|metrobus|tren|colectivo|taxi|pedidos/.test(d))return 'transporte';
+  if(/edesur|edenor|metrogas|camesa|aysa|personal|claro|movistar|telecentro|cablevision|fibertel/.test(d))return 'servicios';
+  if(/colegio|escuela|universidad|udesa|uba|uade|ingles|academia|idioma/.test(d))return 'educacion';
+  if(/alquiler|expensa|abreu|inmobiliaria|prop/.test(d))return 'alquiler';
+  if(/afip|arba|agip|impuesto|rentas|patente|cbos/.test(d))return 'impuestos';
+  if(/restaurante|resto|mc\s?donalds|burger|sushi|pizza|cafe|starbucks|panaderia|rotiseria/.test(d))return 'alimentos';
+  return 'otros';
+}
+
+function toggleAllPDF(cb){document.querySelectorAll('.pdf-chk').forEach(c=>c.checked=cb.checked);}
+
+async function importPDFExpenses(){
+  const detected=window._pdfDetected||[];
+  const cardId=document.getElementById('PDF_card').value;
+  const toImport=[];
+  document.querySelectorAll('.pdf-chk').forEach(cb=>{
+    if(cb.checked){const e=detected[parseInt(cb.dataset.idx)];if(e)toImport.push({...e,card:cardId});}
+  });
+  if(!toImport.length){toast('⚠️ Ninguno seleccionado');return;}
+  S.expenses=[...S.expenses,...toImport];
+  persist();
+  if(FB.ready)for(const e of toImport)await fbSet('expenses',e.id,e);
+  closeModal('M_pdf');renderExpenses();if(currentPage==='dashboard')renderDashboard();
+  toast(`✅ ${toImport.length} movimiento(s) importados`);checkAlerts();
+}
+
+// =============================================================
+// EXPORTS
+// =============================================================
+function exportCSV(){
+  const month=document.getElementById('RPT_month')?.value||monthStr();
+  const [yr,mo_]=month.split('-').map(Number);
+  const d=new Date(yr,mo_-1,1);
+  const exps=S.expenses.filter(e=>sameMonth(e.date,d));
+  const header='Fecha,Monto,Categoría,Descripción,Tarjeta,Cuotas,Interés\n';
+  const rows=exps.map(e=>`${e.date},${e.amount},${catName(e.cat)},"${(e.desc||'').replace(/"/g,"'")}",${e.card?(S.cards.find(c=>c.id===e.card)||{name:'Sin tarjeta'}).name:'Efectivo'},${e.installments>1?`${e.curInst}/${e.installments}`:'-'},${e.hasInt?e.intRate+'%':'-'}`).join('\n');
+  const blob=new Blob(['\ufeff'+header+rows],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`gastos_${month}.csv`;a.click();
+  toast('📊 CSV exportado');
+}
+
+function exportPDF(){
+  const J=window.jspdf;
+  if(!J||!J.jsPDF){toast('⚠️ jsPDF no disponible');return;}
+  const {jsPDF}=J;
+  const month=document.getElementById('RPT_month')?.value||monthStr();
+  const [yr,mo_]=month.split('-').map(Number);
+  const d=new Date(yr,mo_-1,1);
+  const exps=S.expenses.filter(e=>sameMonth(e.date,d));
+  const total=exps.reduce((s,e)=>s+(e.amount||0),0);
+  const income=S.user?.salary||0;
+  const doc=new jsPDF();
+  // Header
+  doc.setFillColor(224,123,57);doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+  doc.text('FamilyFinance',14,13);
+  doc.setFontSize(11);doc.setFont('helvetica','normal');
+  doc.text(`Reporte: ${monthLabel(d)} · ${S.user?.name||''}`,14,22);
+  // Summary
+  doc.setTextColor(50);doc.setFontSize(10);
+  const summaryY=36;
+  [['Ingresos',income,41,104],[' Gastos',total,90,229],[' Balance',income-total,139,income-total>=0?82:231]].forEach(([label,val,x,g])=>{
+    doc.setTextColor(80);doc.text(label,x,summaryY);
+    doc.setFont('helvetica','bold');doc.setTextColor(g,g===104?104:g===229?68:g===82?130:68,g===104?229:g===229?68:g);
+    doc.text('$'+Math.round(val).toLocaleString('es-AR'),x,summaryY+6);
+    doc.setFont('helvetica','normal');
+  });
+  // Table
+  if(exps.length&&doc.autoTable){
+    doc.autoTable({startY:52,
+      head:[['Fecha','Descripción','Categoría','Cuotas','Monto (ARS)']],
+      body:exps.map(e=>[e.date,e.desc||catName(e.cat),catName(e.cat),e.installments>1?`${e.curInst}/${e.installments}`:'-','$'+Math.round(e.amount).toLocaleString('es-AR')]),
+      styles:{fontSize:8,cellPadding:2},
+      headStyles:{fillColor:[224,123,57],textColor:255,fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[253,246,240]},
+      columnStyles:{4:{halign:'right'}}
+    });
+  }
+  // Footer
+  const finalY=doc.lastAutoTable?.finalY||120;
+  doc.setFontSize(8);doc.setTextColor(150);
+  doc.text(`Generado por FamilyFinance · ${new Date().toLocaleDateString('es-AR')}`,14,finalY+12);
+  doc.save(`reporte_${month}.pdf`);
+  toast('📄 PDF exportado');
+}
+
+// =============================================================
+// CHART HELPERS
+// =============================================================
+const isDark=()=>document.documentElement.classList.contains('dark');
+const gc=()=>isDark()?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+const tc=()=>isDark()?'#9ca3af':'#6b7280';
+const hslSeed=seed=>{const h=(seed.split('').reduce((a,c)=>a+c.charCodeAt(0),0))%360;return `hsl(${h},65%,55%)`;};
+
+function mkChart(id,type,labels,data,color,label){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id);if(!ctx)return;
+  charts[id]=new Chart(ctx,{type,data:{labels,datasets:[{label,data,borderColor:color,backgroundColor:color+'22',tension:.4,fill:true,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10},callback:v=>fmtARS(v)}}}}});
+}
+function mkChartMulti(id,type,labels,datasets){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id);if(!ctx)return;
+  charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:10},color:tc(),boxWidth:12}}},scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10},callback:v=>fmtARS(v)}}}}});
+}
+
+// =============================================================
+// MODALS
+// =============================================================
+function closeModal(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.classList.add('hidden');
+  // Force layout flush so hidden takes effect before any subsequent render
+  void el.offsetHeight;
+  forceRepaint();
+}
+function bgClose(ev,id){if(ev.target.id===id)closeModal(id);}
+
+// =============================================================
+// TOAST
+// =============================================================
+let _toastTimer=null;
+function toast(msg,dur=2800){
+  const el=document.getElementById('TOAST');
+  el.textContent=msg;el.classList.remove('hidden');el.style.opacity='1';
+  if(_toastTimer)clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>{el.style.opacity='0';setTimeout(()=>el.classList.add('hidden'),350);},dur);
+}
+
+// =============================================================
+// PWA — Manifest + Service Worker
+// =============================================================
+function setupPWA(){
+  // Dynamic manifest
+  const manifest={name:'FamilyFinance',short_name:'FamilyFinance',start_url:'.',display:'standalone',background_color:'#e07b39',theme_color:'#e07b39',description:'Gestión de gastos familiares',icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23e07b39'/%3E%3Ctext x='256' y='330' font-size='280' text-anchor='middle'%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml'}]};
+  const mBlob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const mLink=document.createElement('link');mLink.rel='manifest';mLink.href=URL.createObjectURL(mBlob);document.head.appendChild(mLink);
+
+  // Service Worker for offline support
+  if('serviceWorker' in navigator){
+    const swCode=`
+const V='ff-v2';
+const PRECACHE=['https://cdn.tailwindcss.com','https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(PRECACHE).catch(()=>{})));self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{if(res.ok){const c=res.clone();caches.open(V).then(ca=>ca.put(e.request,c));}return res;}).catch(()=>r||new Response('Offline',{status:503}))));});`;
+    const swBlob=new Blob([swCode],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  }
+
+  // Install prompt banner
+  let dp=null;
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();dp=e;
+    if(localStorage.getItem('ff_installed'))return;
+    setTimeout(()=>{
+      const b=document.createElement('div');
+      b.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#e07b39;color:#fff;padding:.65rem 1.25rem;border-radius:30px;font-size:.8rem;font-weight:700;z-index:100;cursor:pointer;box-shadow:0 4px 20px rgba(224,123,57,.5);white-space:nowrap;animation:fadeIn .3s ease';
+      b.innerHTML='📲 Instalar FamilyFinance';
+      b.onclick=()=>{dp.prompt();localStorage.setItem('ff_installed','1');b.remove();};
+      document.body.appendChild(b);
+      setTimeout(()=>b.remove(),9000);
+    },4000);
+  });
+}
+
+// =============================================================
+// INIT
+// =============================================================
+let _appStarted = false; // guard against double-start
+
+async function init(){
+  initDark(); applyLang(); setupPWA();
+
+  // Show "no firebase" state immediately so auth screen looks correct
+  updateFBStatusUI(false);
+
+  // ── Step 1: Auto-init Firebase if config is saved ──────────
+  const savedCfg = LG('fb_config', null);
+  let fbAutoConnected = false;
+
+  if(savedCfg && savedCfg.apiKey && savedCfg.projectId && savedCfg.authDomain){
+    // Show connecting status on splash
+    const splashTxt = document.querySelector('#SCR_LOADING p.text-orange-100');
+    if(splashTxt) splashTxt.textContent = '🔥 Conectando Firebase...';
+
+    try{
+      fbAutoConnected = await Promise.race([
+        initFirebase(savedCfg),
+        new Promise(r=>setTimeout(()=>r(false), 5000)) // 5s timeout
+      ]);
+    }catch(e){
+      console.warn('Auto Firebase init failed:', e);
+    }
+
+    if(splashTxt) splashTxt.textContent = 'Gestión Familiar Inteligente';
+  }
+
+  // ── Step 2: Minimum splash display ────────────────────────
+  await new Promise(r=>setTimeout(r, 800));
+
+  // ── Step 3: Try Firebase session if connected ──────────────
+  if(FB.ready && FB.auth){
+    let resolved = false;
+
+    await new Promise(resolve=>{
+      const unsub = FB.auth.onAuthStateChanged(async fbUser=>{
+        if(resolved) return;
+        resolved = true;
+        unsub();
+
+        if(fbUser){
+          // Existing Firebase session → auto re-login
+          try{
+            const profile = await fbGet('users', fbUser.uid) || {};
+            const user = {
+              id:           fbUser.uid,
+              name:         profile.name  || fbUser.displayName || fbUser.email?.split('@')[0] || 'Usuario',
+              email:        fbUser.email,
+              salary:       profile.salary       || 0,
+              inflationRate:profile.inflationRate || 5,
+              familyId:     profile.familyId     || null,
+              role:         profile.role          || 'member'
+            };
+            await loginSuccess(user);
+            if(fbAutoConnected) toast('✅ Firebase conectado automáticamente', 3500);
+          }catch(e){
+            console.warn('FB auto-login error:', e);
+            _tryLocalSession();
+          }
+        }else{
+          // Firebase SDK loaded but no active session
+          if(fbAutoConnected) toast('🔥 Firebase listo — ingresá con tu cuenta', 2500);
+          _tryLocalSession();
+        }
+        resolve();
+      }, async(authErr)=>{
+        // onAuthStateChanged error callback — Auth itself failed (e.g. configuration-not-found)
+        // This means Firebase SDK loaded but Auth is not configured
+        if(!resolved){
+          resolved=true;
+          unsub();
+          console.warn('FB onAuthStateChanged error:', authErr.code||authErr.message);
+          // Mark auth as not usable, but keep Firestore if available
+          if(authErr.code==='auth/configuration-not-found'||authErr.code==='auth/invalid-api-key'){
+            // Silently disable Firebase Auth — app will use local auth
+            // FB.ready stays true for Firestore reads, but auth operations will fall back
+            FB.auth=null; // disable auth portion
+            updateFBStatusUI(false,'Auth no configurado — usando modo local');
+          }
+          _tryLocalSession();
+          resolve();
+        }
+      });
+
+      // Hard timeout: if onAuthStateChanged doesn't fire in 5s, fall back
+      setTimeout(()=>{
+        if(!resolved){
+          resolved=true;
+          unsub();
+          console.warn('Firebase auth state timeout — falling back to local');
+          _tryLocalSession();
+          resolve();
+        }
+      }, 5000);
+    });
+
+    return;
+  }
+
+  // ── Step 4: No Firebase — local only ──────────────────────
+  _tryLocalSession();
+}
+
+// Restore local session or show auth screen — idempotent
+function _tryLocalSession(){
+  if(_appStarted) return;
+  _appStarted = true;
+
+  const lastuid = localStorage.getItem('ff_lastuid');
+  if(lastuid){
+    loadForUser(lastuid);
+    if(S.user){
+      showScreen('app');
+      updateTopbar();
+      checkAlerts();
+      populateSettingsForm();
+      nav('dashboard');
+      // Post-init repaint: force re-render after 300ms to fix any GitHub Pages paint lag
+      setTimeout(()=>{
+        renderDashboard();
+        forceRepaint();
+      }, 300);
+    }else{
+      showScreen('auth');
+      updateFBStatusUI(FB.ready);
+    }
+  }else{
+    showScreen('auth');
+    updateFBStatusUI(FB.ready);
+  }
+}
+
+// ── POST-LOAD: Re-trigger Tailwind + force repaint ─────────────
+// GitHub Pages sometimes serves cached HTML where Tailwind CDN needs
+// a nudge to process all classes after the DOM is fully interactive.
+window.addEventListener('load', ()=>{
+  // Re-apply Tailwind config in case CDN loaded from cache without processing
+  if(typeof tailwind !== 'undefined' && tailwind.config){
+    try{ tailwind.config = { darkMode:'class' }; }catch{}
+  }
+  // Force a repaint pass so all Tailwind utility classes are visually applied
+  forceRepaint();
+  // Second repaint at 400ms catches any async-rendered content
+  setTimeout(()=>forceRepaint(), 400);
+});
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
